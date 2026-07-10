@@ -1,0 +1,8 @@
+﻿{
+    "recommendations":  [
+                            "mtxr.sqltools",
+                            "mtxr.sqltools-driver-pg",
+                            "mtxr.sqltools-driver-mssql",
+                            "lucashancock.db2-sqltools"
+                        ]
+}

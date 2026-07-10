@@ -1,0 +1,6 @@
+- Campos do tipo flag (char(1)) devem possuir uma CKT para obrigar o preenchimento em 'F' ou 'T';
+- Nomes de PK ou FK sempre deverão possuir o sufixo PK/FK + o nome da tabela;
+- Comandos de insert de registros em tabelas criadas sempre precisarão do comando not exists, para validar a inserção somente se não existir o registro na tabela, evitando falha de PK;
+- Principalmente campos com tipagem deverão possuir comentário na coluna para identificar a que se refere cada tipo;
+- Alteração de colunas obriga REORG;
+- Campos do tipo data/hora deverão utilizar o formato TIMESTAMP e não pode ser DATETIME pois não é um tipo aceito;

@@ -1,0 +1,13 @@
+# Configuracoes locais do VS Code/SQLTools podem conter credenciais.
+.vscode/settings.json
+
+# Arquivos temporarios e de ambiente local.
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Backups locais.
+*.bak
+*.backup
+*~

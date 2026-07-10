@@ -1,0 +1,10 @@
+{
+    "language": "db2",
+    "tabWidth": 4,
+    "keywordCase": "upper",
+    "dataTypeCase": "upper",
+    "functionCase": "upper",
+    "identifierCase": "preserve",
+    "expressionWidth": 80,
+    "linesBetweenQueries": 1
+}
