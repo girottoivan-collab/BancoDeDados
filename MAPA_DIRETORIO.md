@@ -18,7 +18,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 | --- | --- | --- |
 | `00_referencias` | Referencias de ambiente, conexoes e bases acessiveis | Use para notas de infraestrutura, catalogos de conexao e informacoes que apoiam mais de um assunto. Nao registrar senhas. |
 | `01_padroes_sql` | Padrao de desenvolvimento e formatacao SQL | Use para guias, exemplos base, configuracoes de formatter e convencoes de DDL/DML. Consulte antes de reformatar scripts. |
-| `02_taxas_administradoras` | Arquitetura e objetos de taxas de administradoras por vigencia | Use para documentacao, DER e objetos SQL da solucao de taxas por administradora/bandeira/parcela. |
+| `02_taxas_administradoras` | Arquitetura e objetos de historico de taxas de administradoras | Use para documentacao, DER e objetos SQL da solucao de taxas por administradora/bandeira/parcela. |
 | `03_produto_fornecedor` | Consulta e analise de produto x fornecedor | Use para consultas, evidencias e CSVs relacionados a produto, fornecedor, precificacao e analises de SQL corrente desse tema. |
 | `04_pedido_compra` | Procedure, views e ajustes de pedido de compra | Use para `SP_INSERT_PEDIDO_COMPRA_PROD`, views GEA, backups ou versoes de apoio das rotinas de pedido de compra. |
 | `05_wms` | Integracao WMS, conferencia de pedido e views de entrada | Use para funcoes, triggers e views que controlam uso de WMS ou geram entrada WMS. |
@@ -27,6 +27,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 | `08_tickets_ciss` | Scripts vinculados a tickets CISS | Use para scripts identificados por numero de ticket, especialmente quando alteram mais de uma tabela ou regra. |
 | `09_catalogo_dbadmin` | Exportacao/catalogo do DbAdmin | Use para scripts e resultados exportados do catalogo DbAdmin. Atualizacoes devem manter script e saida juntos. |
 | `10_integracoes_integrin` | Integracoes INTEGRIM/Integrin | Use para funcoes e migrations ligadas ao schema `INTEGRIM` e a rotinas de integracao externa. |
+| `CONTROL` | Demandas e scripts da aplicacao Control | Use para alteracoes vinculadas ao Control, incluindo scripts de DDL/DML e procedures auxiliares. |
 
 ## Arquivos por diretorio
 
@@ -45,8 +46,8 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 
 - `ArquiteturaTaxasAdministradoras.md`: desenho funcional/tecnico da solucao.
 - `DER_TaxasAdministradoras.svg`: diagrama visual do modelo.
-- `TR_ADMIN_BANDEIRA_TAXA_VIGENCIA.sql`: trigger da solucao de vigencia.
-- `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: function de consulta de taxa por data/vigencia.
+- `ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.sql`: script completo da tabela historica, function de consulta e configuracao.
+- `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: function de consulta de taxa por data historica.
 
 ### `03_produto_fornecedor`
 
@@ -89,3 +90,7 @@ Observacao: o arquivo original `moncurrentsqlNOPONTO.csv` permaneceu temporariam
 ### `10_integracoes_integrin`
 
 - `V46__function_set_item_pedido_integrin_v2.sql`: migration/function `INTEGRIM.SET_ITEM_PEDIDO_INTEGRIN_V2`.
+
+### `CONTROL`
+
+- `SP_ATUALIZA_QTDALTERACOESMANUAIS_CONFERE_PEDIDO.sql`: script para criar o campo `QTDALTERACOESMANUAIS`, atualizar nulos em lotes e aplicar `NOT NULL`.

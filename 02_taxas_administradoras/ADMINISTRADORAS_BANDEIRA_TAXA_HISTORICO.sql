@@ -1,54 +1,3 @@
-# Taxas de administradoras por parcela e historico
-
-## Objetivo
-
-Registrar historico de taxas por administradora, bandeira e faixa de parcelas, permitindo reprocessamento por uma data historica usando apenas a data final de validade (`DTFIM`) dos registros historicos.
-
-## Modelo proposto
-
-```mermaid
-erDiagram
-    ADMINISTRADORAS_BANDEIRA ||--o{ ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO : possui
-
-    ADMINISTRADORAS_BANDEIRA {
-        integer IDEMPRESA PK
-        integer IDBANDEIRA PK
-        integer IDADMINISTRADORA PK
-        decimal PERTAXAADMINISTRACAO
-    }
-
-    ADMINISTRADORAS_BANDEIRA_TAXAS {
-        integer IDEMPRESA
-        integer IDBANDEIRA
-        integer IDADMINISTRADORA
-        smallint NUMPARCELAS
-        decimal TAXA
-    }
-
-    ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO {
-        integer IDCONTADOR PK
-        integer IDEMPRESA PK, FK
-        integer IDBANDEIRA PK, FK
-        integer IDADMINISTRADORA PK, FK
-        smallint NUMPARCELA
-        decimal PERCTAXA
-        integer IDUSUARIO
-        timestamp DTFIM
-        timestamp DTALTERACAO
-    }
-```
-
-## Regra de consulta
-
-- `DTFIM` representa ate quando a taxa historica valeu.
-- A UF procura taxa historica onde `DTFIM > DTMOVIMENTO`.
-- Se nao existir historico aplicavel, retorna a taxa atual vinda de `ADMINISTRADORAS_BANDEIRA` ou `ADMINISTRADORAS_BANDEIRA_TAXAS`.
-- `NUMPARCELA` representa o limite usado para resolver a faixa de parcelas.
-- A consulta busca a maior faixa menor que a parcela informada, conforme regra atual das tabelas de taxas.
-
-## Criacao da tabela e objetos
-
-```sql
 DROP INDEX DBA.IX_ADMINBANDTAXAHIS_CONSULTA
 GO
 
@@ -86,11 +35,7 @@ GO
 CREATE INDEX DBA.IX_ADMINBANDTAXAHIS_CONSULTA
     ON DBA.ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO (IDEMPRESA, IDBANDEIRA, IDADMINISTRADORA, NUMPARCELA, DTFIM)
 GO
-```
 
-## Comentarios
-
-```sql
 COMMENT ON TABLE DBA.ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO IS 'Historico de taxas por parcela da administradora/bandeira com periodo de vigencia.'
 GO
 
@@ -120,11 +65,7 @@ GO
 
 COMMENT ON COLUMN DBA.ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.DTALTERACAO IS 'Data e horario da ultima alteracao.'
 GO
-```
 
-## Funcao para consulta por data
-
-```sql
 CREATE OR REPLACE FUNCTION DBA.UF_ADMIN_BANDEIRA_TAXA_DATA (
     IN_IDEMPRESA        INTEGER,
     IN_IDADMINISTRADORA INTEGER,
@@ -200,20 +141,7 @@ BEGIN
     RETURN COALESCE(V_TAXA, 0);
 END
 GO
-```
 
-Exemplo de uso:
-
-```sql
-SELECT
-    DBA.UF_ADMIN_BANDEIRA_TAXA_DATA(1, 10, 2, 4, TIMESTAMP('2026-07-09-00.00.00')) AS PERCTAXA
-FROM
-    SYSIBM.SYSDUMMY1
-```
-
-## Configuracao
-
-```sql
 INSERT INTO DBA.CONFIG_ENTIDADE (ENTIDADE, CHAVE1, CHAVE2, DADOS, OBSERVACAO, DTALTERACAO)
 SELECT
     'HIS',
@@ -234,4 +162,3 @@ WHERE
             CE.ENTIDADE = 'HIS' AND
             CE.CHAVE1 = 1 AND
             CE.CHAVE2 = 1)
-```

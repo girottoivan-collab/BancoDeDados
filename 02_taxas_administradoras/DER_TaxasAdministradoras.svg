@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
-  <title id="title">DER - Taxas de Administradoras por Parcela e Vigencia</title>
-  <desc id="desc">Diagrama entidade-relacionamento entre ADMINISTRADORAS_BANDEIRA e ADMINISTRADORAS_BANDEIRA_TAXA_VIGENCIA.</desc>
+  <title id="title">DER - Historico de Taxas de Administradoras</title>
+  <desc id="desc">Diagrama entidade-relacionamento entre ADMINISTRADORAS_BANDEIRA e ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.</desc>
   <defs>
     <style>
       .page { fill: #f7f9fb; }
@@ -10,9 +10,7 @@
       .entity-header { fill: #2f5d62; }
       .entity-name { fill: #ffffff; font: 700 16px Arial, sans-serif; letter-spacing: .2px; }
       .field { fill: #243b53; font: 14px Consolas, "Courier New", monospace; }
-      .field-muted { fill: #627d98; font: 13px Consolas, "Courier New", monospace; }
       .pk { fill: #b7791f; font: 700 12px Arial, sans-serif; }
-      .fk { fill: #2b6cb0; font: 700 12px Arial, sans-serif; }
       .line { stroke: #334e68; stroke-width: 2.2; fill: none; }
       .cardinality { fill: #102a43; font: 700 15px Arial, sans-serif; }
       .note { fill: #ffffff; stroke: #bcccdc; stroke-width: 1.5; rx: 8; }
@@ -23,11 +21,11 @@
 
   <rect class="page" x="0" y="0" width="1120" height="560"/>
 
-  <text class="title" x="56" y="54">DER - Taxas de administradoras por parcela e vigencia</text>
-  <text class="subtitle" x="56" y="80">Nova tabela historica ligada diretamente a ADMINISTRADORAS_BANDEIRA por FK composta</text>
+  <text class="title" x="56" y="54">DER - Historico de taxas por administradora/bandeira</text>
+  <text class="subtitle" x="56" y="80">Tabela historica com DTFIM como marcador de validade</text>
 
   <g transform="translate(70 155)">
-    <rect class="entity" x="0" y="0" width="340" height="150"/>
+    <rect class="entity" x="0" y="0" width="340" height="180"/>
     <path class="entity-header" d="M8 0H332A8 8 0 0 1 340 8V42H0V8A8 8 0 0 1 8 0Z"/>
     <text class="entity-name" x="24" y="27">ADMINISTRADORAS_BANDEIRA</text>
 
@@ -37,46 +35,43 @@
     <text class="field" x="58" y="107">IDBANDEIRA</text>
     <text class="pk" x="24" y="136">PK</text>
     <text class="field" x="58" y="137">IDADMINISTRADORA</text>
+    <text class="field" x="58" y="166">PERTAXAADMINISTRACAO</text>
   </g>
 
-  <g transform="translate(675 105)">
-    <rect class="entity" x="0" y="0" width="390" height="310"/>
-    <path class="entity-header" d="M8 0H382A8 8 0 0 1 390 8V42H0V8A8 8 0 0 1 8 0Z"/>
-    <text class="entity-name" x="20" y="27">ADMINISTRADORAS_BANDEIRA_TAXA_VIGENCIA</text>
+  <g transform="translate(655 95)">
+    <rect class="entity" x="0" y="0" width="420" height="350"/>
+    <path class="entity-header" d="M8 0H412A8 8 0 0 1 420 8V42H0V8A8 8 0 0 1 8 0Z"/>
+    <text class="entity-name" x="20" y="27">ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO</text>
 
-    <text class="pk" x="22" y="76">PK/FK</text>
-    <text class="field" x="78" y="77">IDEMPRESA</text>
-
+    <text class="pk" x="22" y="76">PK</text>
+    <text class="field" x="78" y="77">IDCONTADOR</text>
     <text class="pk" x="22" y="105">PK/FK</text>
-    <text class="field" x="78" y="106">IDBANDEIRA</text>
-
+    <text class="field" x="78" y="106">IDEMPRESA</text>
     <text class="pk" x="22" y="134">PK/FK</text>
-    <text class="field" x="78" y="135">IDADMINISTRADORA</text>
-
-    <text class="pk" x="22" y="163">PK</text>
-    <text class="field" x="78" y="164">NUMPARCELA_ATE</text>
-    <text class="pk" x="22" y="192">PK</text>
-    <text class="field" x="78" y="193">DTINICIO</text>
+    <text class="field" x="78" y="135">IDBANDEIRA</text>
+    <text class="pk" x="22" y="163">PK/FK</text>
+    <text class="field" x="78" y="164">IDADMINISTRADORA</text>
+    <text class="field" x="78" y="193">NUMPARCELA</text>
     <text class="field" x="78" y="222">PERCTAXA</text>
-    <text class="field" x="78" y="251">DTFIM</text>
-    <text class="field" x="78" y="280">IDUSUARIO</text>
+    <text class="field" x="78" y="251">IDUSUARIO</text>
+    <text class="field" x="78" y="280">DTFIM</text>
     <text class="field" x="78" y="309">DTALTERACAO</text>
   </g>
 
-  <path class="line" d="M410 230H675"/>
-  <text class="cardinality" x="438" y="220">1</text>
-  <text class="cardinality" x="626" y="220">0..N</text>
-  <text class="subtitle" x="488" y="255">possui vigencias</text>
+  <path class="line" d="M410 245H655"/>
+  <text class="cardinality" x="438" y="235">1</text>
+  <text class="cardinality" x="606" y="235">0..N</text>
+  <text class="subtitle" x="476" y="270">possui historico</text>
 
-  <g transform="translate(70 375)">
-    <rect class="note" x="0" y="0" width="480" height="112"/>
+  <g transform="translate(70 395)">
+    <rect class="note" x="0" y="0" width="500" height="92"/>
     <text class="note-title" x="20" y="30">Consulta historica</text>
-    <text class="note-text" x="20" y="58">Chave de busca: administradora/bandeira + parcela + data do movimento.</text>
-    <text class="note-text" x="20" y="82">Intervalo: DTINICIO inclusivo e DTFIM exclusivo; DTFIM nulo indica vigencia aberta.</text>
+    <text class="note-text" x="20" y="58">Busca historico com DTFIM maior que a data do movimento.</text>
+    <text class="note-text" x="20" y="80">Sem historico aplicavel, retorna a taxa atual das tabelas existentes.</text>
   </g>
 
-  <g transform="translate(585 445)">
-    <rect class="note" x="0" y="0" width="480" height="52"/>
-    <text class="note-title" x="20" y="31">ADMINISTRADORAS_BANDEIRA_TAXAS permanece apenas como legado, fora do novo historico.</text>
+  <g transform="translate(610 465)">
+    <rect class="note" x="0" y="0" width="465" height="42"/>
+    <text class="note-title" x="20" y="27">ADMINISTRADORAS_BANDEIRA_TAXAS compoe o fallback de taxa atual por parcela.</text>
   </g>
 </svg>
