@@ -123,4 +123,4 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 ### `15_CMC`
 
 - `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `ObjetosCMC_V1.sql`: objetos iniciais para processamento de custo medio de compra, incluindo tabelas, indices, function, procedure e triggers.
+- `ObjetosCMC.sql`: objetos para processamento de custo medio de compra, incluindo tabelas, indices, function, procedure e triggers.
