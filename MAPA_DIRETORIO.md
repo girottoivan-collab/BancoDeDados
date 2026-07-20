@@ -124,3 +124,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 
 - `MAPA_DIRETORIO.md`: mapa local do diretorio.
 - `ObjetosCMC.sql`: objetos para processamento de custo medio de compra, incluindo tabelas, indices, function, procedure e triggers.
+- `ObjetosCMC_v2.sql`: recorte com objetos novos e objetos alterados em relacao a primeira versao do Git.
+- `Detalhamento_Alteracoes_ObjetosCMC.md`: documentacao das mudancas, dicionario das novas tabelas e roteiro de validacao.
+- `DER_Agrupamento_Custo_CMC.mmd`: DER Mermaid das tabelas de agrupamento de custo para CMC.
+- `DER_Agrupamento_Custo_CMC.svg`: renderizacao SVG do DER de agrupamento de custo para CMC.

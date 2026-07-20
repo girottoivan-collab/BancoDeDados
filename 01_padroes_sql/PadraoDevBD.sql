@@ -1,5 +1,6 @@
 - Campos do tipo flag (char(1)) devem possuir uma CKT para obrigar o preenchimento em 'F' ou 'T';
 - Nomes de PK ou FK sempre deverão possuir o sufixo PK/FK + o nome da tabela;
+- Sempre forçar o drop de PK e FK antes de criar a tabela e criar cada constraint em comando exclusivo logo abaixo do CREATE TABLE, separado com GO e sem linha em branco entre os comandos;
 - Comandos de insert de registros em tabelas criadas sempre precisarão do comando not exists, para validar a inserção somente se não existir o registro na tabela, evitando falha de PK;
 - Principalmente campos com tipagem deverão possuir comentário na coluna para identificar a que se refere cada tipo;
 - Alteração de colunas obriga REORG;
