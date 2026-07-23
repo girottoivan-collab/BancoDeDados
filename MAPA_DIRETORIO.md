@@ -31,6 +31,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 | `12_CONTROL` | Demandas e scripts da aplicacao Control | Use para alteracoes vinculadas ao Control, incluindo scripts de DDL/DML e procedures auxiliares. |
 | `14_DRE_Caixa` | Consultas e estudos de DRE de caixa | Use para scripts de DRE, visoes sinteticas e comparativos de totais relacionados a caixa. |
 | `15_CMC` | Objetos de custo medio de compra | Use para tabelas, funcoes, procedures e triggers relacionadas ao processamento de CMC. |
+| `16_MonitorFront` | Consultas de produtos para Monitor CissFront | Use para consultas de carga de produtos do frente de caixa, com ou sem cenario fiscal, e versoes ajustadas para multiplas empresas. |
 
 ## Arquivos por diretorio
 
@@ -128,3 +129,14 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 - `Detalhamento_Alteracoes_ObjetosCMC.md`: documentacao das mudancas, dicionario das novas tabelas e roteiro de validacao.
 - `DER_Agrupamento_Custo_CMC.mmd`: DER Mermaid das tabelas de agrupamento de custo para CMC.
 - `DER_Agrupamento_Custo_CMC.svg`: renderizacao SVG do DER de agrupamento de custo para CMC.
+
+### `16_MonitorFront`
+
+- `MAPA_DIRETORIO.md`: mapa local do diretorio.
+- `SelectProdutosComCenarioFiscal.txt`: consulta original de produtos com tributacao por cenario fiscal.
+- `SelectProdutosComCenarioFiscal_v2.txt`: versao ajustada para carregar todas as empresas via CTE `EMPRESAS_BASE`.
+- `SelectProdutosSemCenarioFiscal.txt`: consulta original de produtos sem tributacao por cenario fiscal.
+- `SelectProdutosSemCenarioFiscal_v2.txt`: versao ajustada para carregar todas as empresas via CTE `EMPRESAS_BASE`.
+- `Validacao_TSTPONTO_2026-07-23.md`: registro da validacao executada na base `TSTPONTO`.
+- `validar_monitorfront_db2clp.ps1`: script de validacao via Db2 CLP para medir filtros na CTE.
+- `validar_monitorfront.ps1`: script auxiliar de validacao via ODBC.
