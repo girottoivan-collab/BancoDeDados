@@ -7,6 +7,7 @@ Guardar referencias de ambiente, conexoes e bases acessiveis que apoiam mais de 
 ## Conteudo
 
 - `BASES_ACESSIVEIS.md`: conexoes Db2 e SQLTools identificadas no ambiente.
+- `METODO_CONEXAO_DB2.md`: metodo recomendado para catalogar, conectar e executar consultas Db2 via `db2cmd` no Windows.
 - `MAPA_DIRETORIO.md`: este mapa local.
 
 ## Regras locais

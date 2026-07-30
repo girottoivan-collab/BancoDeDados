@@ -14,6 +14,7 @@ Arquivo de referencia das conexoes de banco identificadas no workspace/local Db2
 | EDUARDO | EDUARDO | AUTOEDU | 10.115.105.1 | 25000 | Catalogada |
 | VLUZ | VLUZ | DB115 | 10.115.104.20 | 50045 | Catalogada |
 | FERRARI | FERRARI | TSTFER | 10.250.0.4 | 50005 | Catalogada |
+| BESEN2 | BESEN2 | BESEN2 | 10.250.4.43 | 50025 | Catalogada e autenticada com usuario `dba` |
 
 ## SQLTools no workspace
 
@@ -22,6 +23,7 @@ Arquivo de referencia das conexoes de banco identificadas no workspace/local Db2
 | PRIVADO | Db2 Driver for SQLTools | 10.115.5.1 | 50003 | PRIVADO | Adicionada como base principal para a arquitetura de taxas |
 | PRIVADO_NEW_10.5 | Db2 Driver for SQLTools | 10.250.4.65 | 40000 | PRIVADO | Alternativa catalogada como `SQLEXEC0` no Db2 local |
 | PRIVADO_NEW_11.5 | Db2 Driver for SQLTools | 10.250.4.65 | 50000 | PRIVADO | Alternativa cadastrada no workspace |
+| TST_BESEN2 | Db2 Driver for SQLTools | 10.250.4.43 | 50025 | BESEN2 | Usuario `dba`, senha nao registrada no Git, adicionada para testes |
 
 ## Observacoes
 

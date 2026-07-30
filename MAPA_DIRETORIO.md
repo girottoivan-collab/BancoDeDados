@@ -12,6 +12,20 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 - Backups pontuais devem ficar ao lado do objeto principal, com sufixo de data ou contexto.
 - Cada diretorio de trabalho deve manter seu proprio `MAPA_DIRETORIO.md` com objetivo, arquivos e regras locais.
 
+## Atalho operacional: `VersioneGit`
+
+Quando o usuario digitar exatamente a expressao `VersioneGit`, executar a verificacao e o versionamento Git de todos os diretorios de trabalho conhecidos no workspace, incluindo `C:\Users\ivan.girotto\Documents\BancoDeDados` e `C:\Users\ivan.girotto\Documents\dbadmin`.
+
+Procedimento obrigatorio:
+
+- Para cada diretorio que contenha `.git`, verificar branch, remote, arquivos modificados, arquivos novos e arquivos removidos.
+- Antes de commitar, revisar o diff e nao incluir arquivos sensiveis, credenciais, caches, dependencias, saidas temporarias ou artefatos ignoraveis.
+- Quando houver rotina de validacao do projeto, executa-la antes do commit. No `dbadmin`, usar `npm.cmd run build`.
+- Se houver alteracoes validas, adicionar os arquivos pertinentes, criar commit com mensagem objetiva em portugues e publicar no remote configurado com `git push`.
+- Se o remote estiver ausente, incorreto, sem autenticacao ou rejeitar o envio, informar claramente o bloqueio e nao forcar push.
+- Nunca usar `git reset --hard`, `git clean`, force push ou sobrescrever historico sem pedido explicito do usuario.
+- Ao final, relatar por diretorio: validacao executada, commit criado, branch publicada ou motivo de nao haver publicacao.
+
 ## Estrutura
 
 | Diretorio | Assunto | Instrucoes |
@@ -32,6 +46,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 | `14_DRE_Caixa` | Consultas e estudos de DRE de caixa | Use para scripts de DRE, visoes sinteticas e comparativos de totais relacionados a caixa. |
 | `15_CMC` | Objetos de custo medio de compra | Use para tabelas, funcoes, procedures e triggers relacionadas ao processamento de CMC. |
 | `16_MonitorFront` | Consultas de produtos para Monitor CissFront | Use para consultas de carga de produtos do frente de caixa, com ou sem cenario fiscal, e versoes ajustadas para multiplas empresas. |
+| `17_GEFOX` | Ajustes e documentacoes do projeto GEFOX | Use para scripts, versoes e documentacoes relacionadas aos objetos ajustados para GEFOX. |
 
 ## Arquivos por diretorio
 
@@ -39,6 +54,7 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 
 - `MAPA_DIRETORIO.md`: mapa local do diretorio.
 - `BASES_ACESSIVEIS.md`: conexoes Db2 e SQLTools identificadas no ambiente.
+- `METODO_CONEXAO_DB2.md`: metodo recomendado para catalogar, conectar e executar consultas Db2 via `db2cmd` no Windows.
 
 ### `01_padroes_sql`
 
@@ -140,3 +156,10 @@ Este arquivo centraliza a organizacao do diretorio principal e indica onde cada 
 - `Validacao_TSTPONTO_2026-07-23.md`: registro da validacao executada na base `TSTPONTO`.
 - `validar_monitorfront_db2clp.ps1`: script de validacao via Db2 CLP para medir filtros na CTE.
 - `validar_monitorfront.ps1`: script auxiliar de validacao via ODBC.
+
+### `17_GEFOX`
+
+- `MAPA_DIRETORIO.md`: mapa local do diretorio.
+- `SP_INSERT_PEDIDO_COMPRA_NEW_16072026.txt`: arquivo original da procedure de gravacao de pedido de compra.
+- `SP_INSERT_PEDIDO_COMPRA_NEW_29072026.sql`: nova versao com function de validacao de COI liberado por empresa.
+- `Documentacao_Jira_COI_Pedido_Compra.md`: documentacao da melhoria para detalhamento tecnico/funcional no projeto do Jira.
