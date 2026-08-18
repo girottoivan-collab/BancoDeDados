@@ -1,16 +1,19 @@
-# Mapa do diretorio 12_CONTROL
+﻿# Mapa do diretorio 12_CONTROL
 
 ## Objetivo
 
-Organizar demandas e scripts da aplicacao Control, incluindo DDL, DML e procedures auxiliares.
+Demandas e scripts da aplicacao Control.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `SP_ATUALIZA_QTDALTERACOESMANUAIS_CONFERE_PEDIDO.sql`: script para criar o campo `QTDALTERACOESMANUAIS`, atualizar nulos em lotes e aplicar `NOT NULL`.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `SP_ATUALIZA_QTDALTERACOESMANUAIS_CONFERE_PEDIDO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Scripts vinculados ao Control devem permanecer neste diretorio.
-- Quando um script tambem afetar outro tema, registre no nome ou em comentario o contexto da demanda.
-- Backups devem indicar data ou origem da versao.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

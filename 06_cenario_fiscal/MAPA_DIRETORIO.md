@@ -1,16 +1,19 @@
-# Mapa do diretorio 06_cenario_fiscal
+﻿# Mapa do diretorio 06_cenario_fiscal
 
 ## Objetivo
 
-Guardar funcoes e consultas relacionadas a origem do produto, composicao de cenario e regras fiscais por produto/empresa.
+Cenario fiscal e origem do produto.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `UF_ORIGEM_PRODUTO_CENARIO_FISCAL.sql`: function para resolver origem do produto no cenario fiscal.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `UF_ORIGEM_PRODUTO_CENARIO_FISCAL.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Use este diretorio para regras fiscais ligadas a produto e empresa.
-- Consultas de diagnostico devem mencionar o objeto ou regra fiscal no nome.
-- Evite incluir scripts fiscais genericos sem relacao com cenario fiscal.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

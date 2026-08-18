@@ -1,16 +1,19 @@
-# Mapa do diretorio 10_integracoes_integrin
+﻿# Mapa do diretorio 10_integracoes_integrin
 
 ## Objetivo
 
-Guardar funcoes e migrations ligadas ao schema `INTEGRIM` e a rotinas de integracao externa Integrin.
+Integracoes INTEGRIM/Integrin.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `V46__function_set_item_pedido_integrin_v2.sql`: migration/function `INTEGRIM.SET_ITEM_PEDIDO_INTEGRIN_V2`.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `V46__function_set_item_pedido_integrin_v2.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Preserve o prefixo de migration quando o script fizer parte de uma esteira versionada.
-- Rotinas do schema `INTEGRIM` devem permanecer neste diretorio.
-- Scripts de integracao de outro dominio devem ganhar diretorio proprio se o volume crescer.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

@@ -1,18 +1,22 @@
-# Mapa do diretorio 17_GEFOX
+﻿# Mapa do diretorio 17_GEFOX
 
 ## Objetivo
 
-Guardar scripts, versoes e documentacoes relacionadas aos ajustes solicitados para o cliente/projeto GEFOX.
+Ajustes e documentacoes do projeto GEFOX.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `SP_INSERT_PEDIDO_COMPRA_NEW_16072026.txt`: arquivo original da procedure de gravacao de pedido de compra.
-- `SP_INSERT_PEDIDO_COMPRA_NEW_29072026.sql`: nova versao com a function de validacao de COI liberado por empresa e ajuste da procedure para utilizar essa function.
-- `Documentacao_Jira_COI_Pedido_Compra.md`: documentacao da melhoria para detalhamento tecnico/funcional no projeto do Jira.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `Documentacao_Jira_COI_Pedido_Compra.md`: Documentacao tecnica ou registro de analise.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `SP_INSERT_PEDIDO_COMPRA_NEW_16072026.txt`: Texto, consulta ou anotacao de apoio.
+- `SP_INSERT_PEDIDO_COMPRA_NEW_29072026.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `TR_VAL_POLITICA_PRECO_PRODUTO_OFF.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Manter o arquivo original sem alteracao quando for solicitada uma nova versao.
-- Usar sufixo `_V2`, `_V3` etc. para novas entregas do mesmo objeto.
-- Documentacoes de impacto ou validacao devem ficar junto dos scripts que motivaram a alteracao.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

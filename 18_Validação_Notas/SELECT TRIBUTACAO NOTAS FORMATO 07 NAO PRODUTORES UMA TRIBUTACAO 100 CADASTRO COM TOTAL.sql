@@ -1,0 +1,350 @@
+WITH NOTAS_MOVIMENTO AS (
+        SELECT
+                EA.IDEMPRESA,
+                EA.IDPLANILHA,
+                N.IDCLIFOR
+        FROM
+                DBA.ESTOQUE_ANALITICO EA
+                INNER JOIN DBA.OPERACAO_INTERNA OI ON
+                        OI.IDOPERACAO = EA.IDOPERACAO
+                INNER JOIN DBA.NOTAS N ON
+                        N.IDEMPRESA = EA.IDEMPRESA
+                        AND N.IDPLANILHA = EA.IDPLANILHA
+        WHERE
+                EA.IDOPERACAO < 1000
+                AND OI.TIPOMOVIMENTO = 'C'
+                AND N.FLAGMOVFISCAL = 'T'
+                AND N.FLAGNOTACANCEL = 'F'
+                AND EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+        GROUP BY
+                EA.IDEMPRESA,
+                EA.IDPLANILHA,
+                N.IDCLIFOR
+),
+ITENS_TRIBUTACAO AS (
+        SELECT
+                NM.IDEMPRESA,
+                NM.IDPLANILHA,
+                NM.IDCLIFOR,
+                CASE
+                        WHEN EA.IDSITTRIB IN (40, 140, 240, 340, 440, 540, 640, 740, 840) THEN 'ISENTO-40'
+                        WHEN EA.IDSITTRIB IN (0, 100, 200, 300, 400, 500, 600, 700, 800) THEN 'TRIBUTADO-00'
+                        WHEN EA.IDSITTRIB IN (20, 120, 220, 320, 420, 520, 620, 720, 820) THEN 'REDUCAO-20'
+                        WHEN EA.IDSITTRIB IN (50, 150, 250, 350, 450, 550, 650, 750, 850) THEN 'SUSPENSO-50'
+                        WHEN EA.IDSITTRIB IN (51, 151, 251, 351, 451, 551, 651, 751, 851) THEN 'DIFERIDO-51'
+                        WHEN EA.IDSITTRIB IN (41, 141, 241, 341, 441, 541, 641, 741, 841) THEN 'NAOTRIBUTADO-41'
+                        WHEN EA.IDSITTRIB IN (90, 190, 290, 390, 490, 590, 690, 790, 890) THEN 'OUTROS-90'
+                        WHEN EA.IDSITTRIB IN (60, 160, 260, 360, 460, 560, 660, 760, 860) THEN 'SUBST-60'
+                        WHEN EA.IDSITTRIB IN (61, 161, 261, 361, 461, 561, 661, 761, 861) THEN 'SUBST-61'
+                END AS TIPO
+        FROM
+                NOTAS_MOVIMENTO NM
+                INNER JOIN DBA.ESTOQUE_ANALITICO EA ON
+                        EA.IDEMPRESA = NM.IDEMPRESA
+                        AND EA.IDPLANILHA = NM.IDPLANILHA
+        WHERE
+                EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+),
+TIPO_NOTA AS (
+        SELECT
+                IDEMPRESA,
+                IDPLANILHA,
+                IDCLIFOR,
+                MAX(TIPO) AS TIPO
+        FROM
+                ITENS_TRIBUTACAO
+        GROUP BY
+                IDEMPRESA,
+                IDPLANILHA,
+                IDCLIFOR
+        HAVING
+                COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
+                AND MAX(TIPO) IS NOT NULL
+),
+TRIBUTACAO_XML AS (
+        SELECT
+                EAF.IDEMPRESA,
+                EAF.IDPLANILHA,
+                CASE
+                        WHEN SUM(CASE WHEN EAF.FLAGTRIBUTACAOXML = 'T' THEN 1 ELSE 0 END) = COUNT(*) THEN 'T'
+                        ELSE 'F'
+                END AS FLAGTRIBUTACAOXML
+        FROM
+                DBA.ESTOQUE_ANALITICO_FISCAL EAF
+                INNER JOIN NOTAS_MOVIMENTO NM ON
+                        NM.IDEMPRESA = EAF.IDEMPRESA
+                        AND NM.IDPLANILHA = EAF.IDPLANILHA
+        GROUP BY
+                EAF.IDEMPRESA,
+                EAF.IDPLANILHA
+),
+DADOS_FORNECEDOR AS (
+        SELECT
+                CF.IDCLIFOR,
+                CF.IDATIVIDADE,
+                TA.DESCRTIPOATIVIDADE AS ATIVIDADE,
+                ATV.FLAGPRODUTORRURAL AS PRODUTOR
+        FROM
+                DBA.CLIENTE_FORNECEDOR CF
+                LEFT JOIN DBA.ATIVIDADE ATV ON
+                        ATV.IDATIVIDADE = CF.IDATIVIDADE
+                LEFT JOIN DBA.ATIVIDADE_TIPO_ATIVIDADE ATA ON
+                        ATA.IDATIVIDADE = CF.IDATIVIDADE
+                        AND ATA.FLAGPADRAO = 'T'
+                LEFT JOIN DBA.TIPO_ATIVIDADE TA ON
+                        TA.IDTIPOATIVIDADE = ATA.IDTIPOATIVIDADE
+),
+APURACAO AS (
+        SELECT
+                TN.IDCLIFOR,
+                DF.IDATIVIDADE,
+                DF.ATIVIDADE,
+                DF.PRODUTOR,
+                TN.TIPO,
+                COUNT(*) AS QTDNOTASTIPO,
+                SUM(CASE WHEN COALESCE(TX.FLAGTRIBUTACAOXML, 'F') = 'T' THEN 1 ELSE 0 END) AS XML,
+                SUM(CASE WHEN COALESCE(TX.FLAGTRIBUTACAOXML, 'F') = 'F' THEN 1 ELSE 0 END) AS CAD
+        FROM
+                TIPO_NOTA TN
+                LEFT JOIN TRIBUTACAO_XML TX ON
+                        TX.IDEMPRESA = TN.IDEMPRESA
+                        AND TX.IDPLANILHA = TN.IDPLANILHA
+                LEFT JOIN DADOS_FORNECEDOR DF ON
+                        DF.IDCLIFOR = TN.IDCLIFOR
+        GROUP BY
+                TN.IDCLIFOR,
+                DF.IDATIVIDADE,
+                DF.ATIVIDADE,
+                DF.PRODUTOR,
+                TN.TIPO
+),
+FORNECEDORES_UMA_TRIBUTACAO AS (
+        SELECT
+                IDCLIFOR
+        FROM
+                APURACAO
+        GROUP BY
+                IDCLIFOR
+        HAVING
+                COUNT(DISTINCT TIPO) = 1
+)
+SELECT
+        A.IDCLIFOR,
+        A.IDATIVIDADE,
+        A.ATIVIDADE,
+        A.PRODUTOR,
+        A.TIPO,
+        A.QTDNOTASTIPO,
+        A.XML,
+        A.CAD,
+        DECIMAL(
+                (CAST(A.XML AS DECIMAL(15,6)) /
+                        NULLIF(CAST(A.QTDNOTASTIPO AS DECIMAL(15,6)), 0)) * 100,
+                15,
+                2
+        ) AS "% XML",
+        DECIMAL(
+                (CAST(A.CAD AS DECIMAL(15,6)) /
+                        NULLIF(CAST(A.QTDNOTASTIPO AS DECIMAL(15,6)), 0)) * 100,
+                15,
+                2
+        ) AS "% CAD"
+FROM
+        APURACAO A
+        INNER JOIN FORNECEDORES_UMA_TRIBUTACAO FUT ON
+                FUT.IDCLIFOR = A.IDCLIFOR
+WHERE
+        A.PRODUTOR = 'F'
+        AND A.XML = 0
+        AND A.CAD = A.QTDNOTASTIPO
+ORDER BY
+        A.IDCLIFOR,
+        A.TIPO;
+
+WITH NOTAS_MOVIMENTO AS (
+        SELECT
+                EA.IDEMPRESA,
+                EA.IDPLANILHA,
+                N.IDCLIFOR
+        FROM
+                DBA.ESTOQUE_ANALITICO EA
+                INNER JOIN DBA.OPERACAO_INTERNA OI ON
+                        OI.IDOPERACAO = EA.IDOPERACAO
+                INNER JOIN DBA.NOTAS N ON
+                        N.IDEMPRESA = EA.IDEMPRESA
+                        AND N.IDPLANILHA = EA.IDPLANILHA
+        WHERE
+                EA.IDOPERACAO < 1000
+                AND OI.TIPOMOVIMENTO = 'C'
+                AND N.FLAGMOVFISCAL = 'T'
+                AND N.FLAGNOTACANCEL = 'F'
+                AND EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+        GROUP BY
+                EA.IDEMPRESA,
+                EA.IDPLANILHA,
+                N.IDCLIFOR
+),
+ITENS_TRIBUTACAO AS (
+        SELECT
+                NM.IDEMPRESA,
+                NM.IDPLANILHA,
+                NM.IDCLIFOR,
+                CASE
+                        WHEN EA.IDSITTRIB IN (40, 140, 240, 340, 440, 540, 640, 740, 840) THEN 'ISENTO-40'
+                        WHEN EA.IDSITTRIB IN (0, 100, 200, 300, 400, 500, 600, 700, 800) THEN 'TRIBUTADO-00'
+                        WHEN EA.IDSITTRIB IN (20, 120, 220, 320, 420, 520, 620, 720, 820) THEN 'REDUCAO-20'
+                        WHEN EA.IDSITTRIB IN (50, 150, 250, 350, 450, 550, 650, 750, 850) THEN 'SUSPENSO-50'
+                        WHEN EA.IDSITTRIB IN (51, 151, 251, 351, 451, 551, 651, 751, 851) THEN 'DIFERIDO-51'
+                        WHEN EA.IDSITTRIB IN (41, 141, 241, 341, 441, 541, 641, 741, 841) THEN 'NAOTRIBUTADO-41'
+                        WHEN EA.IDSITTRIB IN (90, 190, 290, 390, 490, 590, 690, 790, 890) THEN 'OUTROS-90'
+                        WHEN EA.IDSITTRIB IN (60, 160, 260, 360, 460, 560, 660, 760, 860) THEN 'SUBST-60'
+                        WHEN EA.IDSITTRIB IN (61, 161, 261, 361, 461, 561, 661, 761, 861) THEN 'SUBST-61'
+                END AS TIPO
+        FROM
+                NOTAS_MOVIMENTO NM
+                INNER JOIN DBA.ESTOQUE_ANALITICO EA ON
+                        EA.IDEMPRESA = NM.IDEMPRESA
+                        AND EA.IDPLANILHA = NM.IDPLANILHA
+        WHERE
+                EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+),
+TIPO_NOTA AS (
+        SELECT
+                IDEMPRESA,
+                IDPLANILHA,
+                IDCLIFOR,
+                MAX(TIPO) AS TIPO
+        FROM
+                ITENS_TRIBUTACAO
+        GROUP BY
+                IDEMPRESA,
+                IDPLANILHA,
+                IDCLIFOR
+        HAVING
+                COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
+                AND MAX(TIPO) IS NOT NULL
+),
+TRIBUTACAO_XML AS (
+        SELECT
+                EAF.IDEMPRESA,
+                EAF.IDPLANILHA,
+                CASE
+                        WHEN SUM(CASE WHEN EAF.FLAGTRIBUTACAOXML = 'T' THEN 1 ELSE 0 END) = COUNT(*) THEN 'T'
+                        ELSE 'F'
+                END AS FLAGTRIBUTACAOXML
+        FROM
+                DBA.ESTOQUE_ANALITICO_FISCAL EAF
+                INNER JOIN NOTAS_MOVIMENTO NM ON
+                        NM.IDEMPRESA = EAF.IDEMPRESA
+                        AND NM.IDPLANILHA = EAF.IDPLANILHA
+        GROUP BY
+                EAF.IDEMPRESA,
+                EAF.IDPLANILHA
+),
+DADOS_FORNECEDOR AS (
+        SELECT
+                CF.IDCLIFOR,
+                CF.IDATIVIDADE,
+                TA.DESCRTIPOATIVIDADE AS ATIVIDADE,
+                ATV.FLAGPRODUTORRURAL AS PRODUTOR
+        FROM
+                DBA.CLIENTE_FORNECEDOR CF
+                LEFT JOIN DBA.ATIVIDADE ATV ON
+                        ATV.IDATIVIDADE = CF.IDATIVIDADE
+                LEFT JOIN DBA.ATIVIDADE_TIPO_ATIVIDADE ATA ON
+                        ATA.IDATIVIDADE = CF.IDATIVIDADE
+                        AND ATA.FLAGPADRAO = 'T'
+                LEFT JOIN DBA.TIPO_ATIVIDADE TA ON
+                        TA.IDTIPOATIVIDADE = ATA.IDTIPOATIVIDADE
+),
+APURACAO AS (
+        SELECT
+                TN.IDCLIFOR,
+                DF.IDATIVIDADE,
+                DF.ATIVIDADE,
+                DF.PRODUTOR,
+                TN.TIPO,
+                COUNT(*) AS QTDNOTASTIPO,
+                SUM(CASE WHEN COALESCE(TX.FLAGTRIBUTACAOXML, 'F') = 'T' THEN 1 ELSE 0 END) AS XML,
+                SUM(CASE WHEN COALESCE(TX.FLAGTRIBUTACAOXML, 'F') = 'F' THEN 1 ELSE 0 END) AS CAD
+        FROM
+                TIPO_NOTA TN
+                LEFT JOIN TRIBUTACAO_XML TX ON
+                        TX.IDEMPRESA = TN.IDEMPRESA
+                        AND TX.IDPLANILHA = TN.IDPLANILHA
+                LEFT JOIN DADOS_FORNECEDOR DF ON
+                        DF.IDCLIFOR = TN.IDCLIFOR
+        GROUP BY
+                TN.IDCLIFOR,
+                DF.IDATIVIDADE,
+                DF.ATIVIDADE,
+                DF.PRODUTOR,
+                TN.TIPO
+),
+FORNECEDORES_UMA_TRIBUTACAO AS (
+        SELECT
+                IDCLIFOR
+        FROM
+                APURACAO
+        GROUP BY
+                IDCLIFOR
+        HAVING
+                COUNT(DISTINCT TIPO) = 1
+),
+NAO_PRODUTORES AS (
+        SELECT
+                A.*
+        FROM
+                APURACAO A
+                INNER JOIN FORNECEDORES_UMA_TRIBUTACAO FUT ON
+                        FUT.IDCLIFOR = A.IDCLIFOR
+        WHERE
+                A.PRODUTOR = 'F'
+                AND A.XML = 0
+                AND A.CAD = A.QTDNOTASTIPO
+),
+TOTAL_TIPO AS (
+        SELECT
+                TIPO,
+                SUM(QTDNOTASTIPO) AS QTDNOTAS
+        FROM
+                NAO_PRODUTORES
+        GROUP BY
+                TIPO
+),
+TOTAL_GERAL AS (
+        SELECT
+                COALESCE(SUM(QTDNOTAS), 0) AS QTDNOTAS
+        FROM
+                TOTAL_TIPO
+)
+SELECT
+        TIPO,
+        QTDNOTAS,
+        "% QTDNOTAS"
+FROM (
+        SELECT
+                TT.TIPO,
+                TT.QTDNOTAS,
+                DECIMAL(
+                        (CAST(TT.QTDNOTAS AS DECIMAL(15,6)) /
+                                NULLIF(CAST(TG.QTDNOTAS AS DECIMAL(15,6)), 0)) * 100,
+                        15,
+                        2
+                ) AS "% QTDNOTAS",
+                1 AS ORDEM
+        FROM
+                TOTAL_TIPO TT
+                CROSS JOIN TOTAL_GERAL TG
+        UNION ALL
+        SELECT
+                'TOTAL GERAL' AS TIPO,
+                TG.QTDNOTAS,
+                DECIMAL(100, 15, 2) AS "% QTDNOTAS",
+                2 AS ORDEM
+        FROM
+                TOTAL_GERAL TG
+)
+ORDER BY
+        ORDEM,
+        TIPO;

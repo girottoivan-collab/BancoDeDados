@@ -1,19 +1,22 @@
-# Mapa do diretorio 02_taxas_administradoras
+﻿# Mapa do diretorio 02_taxas_administradoras
 
 ## Objetivo
 
-Organizar a documentacao e os objetos SQL da solucao de historico de taxas por administradora, bandeira, parcela e data.
+Arquitetura e objetos de historico de taxas de administradoras.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.sql`: script completo da tabela historica, function de consulta e configuracao.
-- `ArquiteturaTaxasAdministradoras.md`: desenho funcional/tecnico da solucao.
-- `DER_TaxasAdministradoras.svg`: diagrama visual do modelo.
-- `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: function de consulta de taxa por data historica.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `ArquiteturaTaxasAdministradoras.md`: Documentacao tecnica ou registro de analise.
+- `DER_TaxasAdministradoras.svg`: Diagrama ou fonte de diagrama do assunto indicado no nome.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Mantenha a documentacao da arquitetura junto dos scripts que implementam a solucao.
-- Versoes alternativas ou backups devem indicar data ou contexto no nome.
-- Ao alterar o modelo, atualize tambem o DER e a documentacao tecnica quando aplicavel.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

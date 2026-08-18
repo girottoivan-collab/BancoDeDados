@@ -1,0 +1,160 @@
+WITH TIPOS AS (
+        SELECT 'ISENTO-40 + NAOTRIBUTADO-41' AS TIPO FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + SUSPENSO-50' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'NAOTRIBUTADO-41 + SUSPENSO-50' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'NAOTRIBUTADO-41 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'SUSPENSO-50 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + NAOTRIBUTADO-41 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + SUSPENSO-50 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+        UNION ALL SELECT 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90' FROM SYSIBM.SYSDUMMY1
+),
+NOTAS_MOVIMENTO AS (
+        SELECT
+                EA.IDEMPRESA,
+                EA.IDPLANILHA
+        FROM
+                DBA.ESTOQUE_ANALITICO EA
+                INNER JOIN DBA.OPERACAO_INTERNA OI ON
+                        OI.IDOPERACAO = EA.IDOPERACAO
+                INNER JOIN DBA.NOTAS N ON
+                        N.IDEMPRESA = EA.IDEMPRESA
+                        AND N.IDPLANILHA = EA.IDPLANILHA
+        WHERE
+                EA.IDOPERACAO < 1000
+                AND OI.TIPOMOVIMENTO = 'C'
+                AND N.FLAGMOVFISCAL = 'T'
+                AND N.FLAGNOTACANCEL = 'F'
+                AND EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+        GROUP BY
+                EA.IDEMPRESA,
+                EA.IDPLANILHA
+),
+TRIBUTACOES_NOTA AS (
+        SELECT
+                NM.IDEMPRESA,
+                NM.IDPLANILHA,
+                MAX(CASE WHEN EA.IDSITTRIB IN (40, 140, 240, 340, 440, 540, 640, 740, 840) THEN 1 ELSE 0 END) AS TEM_40,
+                MAX(CASE WHEN EA.IDSITTRIB IN (41, 141, 241, 341, 441, 541, 641, 741, 841) THEN 1 ELSE 0 END) AS TEM_41,
+                MAX(CASE WHEN EA.IDSITTRIB IN (50, 150, 250, 350, 450, 550, 650, 750, 850) THEN 1 ELSE 0 END) AS TEM_50,
+                MAX(CASE WHEN EA.IDSITTRIB IN (90, 190, 290, 390, 490, 590, 690, 790, 890) THEN 1 ELSE 0 END) AS TEM_90
+        FROM
+                NOTAS_MOVIMENTO NM
+                INNER JOIN DBA.ESTOQUE_ANALITICO EA ON
+                        EA.IDEMPRESA = NM.IDEMPRESA
+                        AND EA.IDPLANILHA = NM.IDPLANILHA
+        WHERE
+                EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+        GROUP BY
+                NM.IDEMPRESA,
+                NM.IDPLANILHA
+),
+COMBINACOES AS (
+        SELECT
+                IDEMPRESA,
+                IDPLANILHA,
+                CASE
+                        WHEN TEM_40 = 1 AND TEM_41 = 1 AND TEM_50 = 1 AND TEM_90 = 1 THEN 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90'
+                        WHEN TEM_40 = 1 AND TEM_41 = 1 AND TEM_50 = 1 THEN 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50'
+                        WHEN TEM_40 = 1 AND TEM_41 = 1 AND TEM_90 = 1 THEN 'ISENTO-40 + NAOTRIBUTADO-41 + OUTROS-90'
+                        WHEN TEM_40 = 1 AND TEM_50 = 1 AND TEM_90 = 1 THEN 'ISENTO-40 + SUSPENSO-50 + OUTROS-90'
+                        WHEN TEM_41 = 1 AND TEM_50 = 1 AND TEM_90 = 1 THEN 'NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90'
+                        WHEN TEM_40 = 1 AND TEM_41 = 1 THEN 'ISENTO-40 + NAOTRIBUTADO-41'
+                        WHEN TEM_40 = 1 AND TEM_50 = 1 THEN 'ISENTO-40 + SUSPENSO-50'
+                        WHEN TEM_40 = 1 AND TEM_90 = 1 THEN 'ISENTO-40 + OUTROS-90'
+                        WHEN TEM_41 = 1 AND TEM_50 = 1 THEN 'NAOTRIBUTADO-41 + SUSPENSO-50'
+                        WHEN TEM_41 = 1 AND TEM_90 = 1 THEN 'NAOTRIBUTADO-41 + OUTROS-90'
+                        WHEN TEM_50 = 1 AND TEM_90 = 1 THEN 'SUSPENSO-50 + OUTROS-90'
+                END AS TIPO
+        FROM
+                TRIBUTACOES_NOTA
+        WHERE
+                (TEM_40 + TEM_41 + TEM_50 + TEM_90) >= 2
+),
+APURACAO AS (
+        SELECT
+                TIPO,
+                COUNT(*) AS QTDNOTAS
+        FROM
+                COMBINACOES
+        GROUP BY
+                TIPO
+),
+TOTAL_COMBINACOES AS (
+        SELECT
+                COUNT(*) AS QTDTOTALTIPO
+        FROM
+                COMBINACOES
+),
+NOTAS_TOTAL AS (
+        SELECT
+                N.IDEMPRESA,
+                N.IDPLANILHA
+        FROM
+                DBA.NOTAS N
+                INNER JOIN DBA.NOTAS_ENTRADA_SAIDA NES ON
+                        NES.IDEMPRESA = N.IDEMPRESA
+                        AND NES.IDPLANILHA = N.IDPLANILHA
+                INNER JOIN DBA.OPERACAO_INTERNA OI ON
+                        OI.IDOPERACAO = NES.IDOPERACAO
+        WHERE
+                NES.IDOPERACAO < 1000
+                AND OI.TIPOMOVIMENTO = 'C'
+                AND N.FLAGMOVFISCAL = 'T'
+                AND N.FLAGNOTACANCEL = 'F'
+                AND N.DTMOVIMENTO BETWEEN DBA.DTINI(:RA_DTINI) AND DBA.DTFIM(:RA_DTFIM)
+        GROUP BY
+                N.IDEMPRESA,
+                N.IDPLANILHA
+),
+TOTAL_NOTAS AS (
+        SELECT
+                COUNT(*) AS QTDTOTAL
+        FROM
+                NOTAS_TOTAL
+)
+SELECT
+        T.TIPO,
+        COALESCE(A.QTDNOTAS, 0) AS QTDNOTAS,
+        TC.QTDTOTALTIPO,
+        DECIMAL(
+                COALESCE(
+                        (CAST(A.QTDNOTAS AS DECIMAL(15,6)) /
+                                NULLIF(CAST(TC.QTDTOTALTIPO AS DECIMAL(15,6)), 0)) * 100,
+                        0
+                ),
+                15,
+                2
+        ) AS "% TIPO",
+        TN.QTDTOTAL,
+        DECIMAL(
+                COALESCE(
+                        (CAST(A.QTDNOTAS AS DECIMAL(15,6)) /
+                                NULLIF(CAST(TN.QTDTOTAL AS DECIMAL(15,6)), 0)) * 100,
+                        0
+                ),
+                15,
+                2
+        ) AS "% TOTAL"
+FROM
+        TIPOS T
+        LEFT JOIN APURACAO A ON
+                A.TIPO = T.TIPO
+        CROSS JOIN TOTAL_COMBINACOES TC
+        CROSS JOIN TOTAL_NOTAS TN
+ORDER BY
+        CASE T.TIPO
+                WHEN 'ISENTO-40 + NAOTRIBUTADO-41' THEN 1
+                WHEN 'ISENTO-40 + SUSPENSO-50' THEN 2
+                WHEN 'ISENTO-40 + OUTROS-90' THEN 3
+                WHEN 'NAOTRIBUTADO-41 + SUSPENSO-50' THEN 4
+                WHEN 'NAOTRIBUTADO-41 + OUTROS-90' THEN 5
+                WHEN 'SUSPENSO-50 + OUTROS-90' THEN 6
+                WHEN 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50' THEN 7
+                WHEN 'ISENTO-40 + NAOTRIBUTADO-41 + OUTROS-90' THEN 8
+                WHEN 'ISENTO-40 + SUSPENSO-50 + OUTROS-90' THEN 9
+                WHEN 'NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90' THEN 10
+                WHEN 'ISENTO-40 + NAOTRIBUTADO-41 + SUSPENSO-50 + OUTROS-90' THEN 11
+        END

@@ -1,17 +1,20 @@
-# Mapa do diretorio 00_referencias
+﻿# Mapa do diretorio 00_referencias
 
 ## Objetivo
 
-Guardar referencias de ambiente, conexoes e bases acessiveis que apoiam mais de um assunto do repositorio.
+Referencias de ambiente, conexoes e bases acessiveis.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `BASES_ACESSIVEIS.md`: conexoes Db2 e SQLTools identificadas no ambiente.
-- `METODO_CONEXAO_DB2.md`: metodo recomendado para catalogar, conectar e executar consultas Db2 via `db2cmd` no Windows.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `BASES_ACESSIVEIS.md`: Documentacao tecnica ou registro de analise.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `METODO_CONEXAO_DB2.md`: Documentacao tecnica ou registro de analise.
 
 ## Regras locais
 
-- Nao registrar senhas, tokens ou dados sensiveis.
-- Use este diretorio para informacoes compartilhadas por varios temas.
-- Detalhes especificos de um script devem ficar no diretorio do proprio assunto.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

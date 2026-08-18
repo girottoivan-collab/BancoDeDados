@@ -1,165 +1,91 @@
-# Mapa do diretorio BancoDeDados
+﻿# Mapa do diretorio BancoDeDados
 
-Este arquivo centraliza a organizacao do diretorio principal e indica onde cada assunto/objeto deve ficar.
+## Objetivo
+
+Mapa central do projeto BancoDeDados.
 
 ## Regras gerais
 
 - Mantenha na raiz apenas arquivos de mapa/controle geral e diretorios de trabalho.
-- Nao mova `.git`, `.agents` e `.vscode`; eles sao pastas de suporte do workspace.
+- Nao registre credenciais, senhas ou dados sensiveis nos mapas.
 - Preserve o nome original dos scripts SQL para facilitar busca por objeto, ticket ou rotina.
-- Ao criar novo script, coloque-o primeiro na pasta do assunto. Se o assunto ainda nao existir, crie uma pasta numerada e registre aqui.
-- Scripts relacionados ao mesmo prompt, ticket ou solucao devem ficar juntos, mesmo quando misturam `FUNCTION`, `TRIGGER`, `VIEW` e documentacao.
-- Backups pontuais devem ficar ao lado do objeto principal, com sufixo de data ou contexto.
-- Cada diretorio de trabalho deve manter seu proprio `MAPA_DIRETORIO.md` com objetivo, arquivos e regras locais.
+- Ao criar novo script, coloque-o primeiro na pasta do assunto; se o assunto ainda nao existir, crie uma pasta numerada e registre aqui.
+- Cada diretorio deve manter seu proprio `MAPA_DIRETORIO.md` atualizado.
 
 ## Atalho operacional: `VersioneGit`
 
-Quando o usuario digitar exatamente a expressao `VersioneGit`, executar a verificacao e o versionamento Git de todos os diretorios de trabalho conhecidos no workspace, incluindo `C:\Users\ivan.girotto\Documents\BancoDeDados` e `C:\Users\ivan.girotto\Documents\dbadmin`.
+Quando o usuario digitar exatamente a expressao `VersioneGit`, executar a verificacao e o versionamento Git dos diretorios de trabalho conhecidos no workspace.
 
-Procedimento obrigatorio:
+- Verificar branch, remote, arquivos modificados, arquivos novos e arquivos removidos.
+- Revisar o diff antes do commit e nao incluir credenciais, caches, dependencias ou saidas temporarias indevidas.
+- Quando houver rotina de validacao do projeto, executa-la antes do commit.
+- Criar commit com mensagem objetiva em portugues e publicar no remote configurado com `git push`.
+- Se o remote estiver ausente, incorreto, sem autenticacao ou rejeitar envio, informar o bloqueio sem forcar historico.
 
-- Para cada diretorio que contenha `.git`, verificar branch, remote, arquivos modificados, arquivos novos e arquivos removidos.
-- Antes de commitar, revisar o diff e nao incluir arquivos sensiveis, credenciais, caches, dependencias, saidas temporarias ou artefatos ignoraveis.
-- Quando houver rotina de validacao do projeto, executa-la antes do commit. No `dbadmin`, usar `npm.cmd run build`.
-- Se houver alteracoes validas, adicionar os arquivos pertinentes, criar commit com mensagem objetiva em portugues e publicar no remote configurado com `git push`.
-- Se o remote estiver ausente, incorreto, sem autenticacao ou rejeitar o envio, informar claramente o bloqueio e nao forcar push.
-- Nunca usar `git reset --hard`, `git clean`, force push ou sobrescrever historico sem pedido explicito do usuario.
-- Ao final, relatar por diretorio: validacao executada, commit criado, branch publicada ou motivo de nao haver publicacao.
+## Subdiretorios imediatos
 
-## Estrutura
+- `.agents`: Arquivos locais de apoio a agentes do workspace.
+- `.codex`: Arquivos locais de configuracao e apoio do Codex neste workspace.
+- `.vscode`: Configuracoes do Visual Studio Code para o projeto.
+- `00_referencias`: Referencias de ambiente, conexoes e bases acessiveis.
+- `01_padroes_sql`: Padroes de desenvolvimento, formatacao e boas praticas SQL.
+- `02_taxas_administradoras`: Arquitetura e objetos de historico de taxas de administradoras.
+- `03_produto_fornecedor`: Consultas e analises de produto x fornecedor.
+- `04_pedido_compra`: Procedures, views e ajustes de pedido de compra.
+- `05_wms`: Integracao WMS, conferencia de pedido e views de entrada.
+- `06_cenario_fiscal`: Cenario fiscal e origem do produto.
+- `07_validade_fifo`: Controle de validade FIFO.
+- `08_tickets_ciss`: Scripts, evidencias e documentacao vinculados a tickets CISS.
+- `09_catalogo_dbadmin`: Exportacao e catalogo do DbAdmin.
+- `10_integracoes_integrin`: Integracoes INTEGRIM/Integrin.
+- `11_Artigos`: Artigos, estudos e resumos tecnicos.
+- `12_CONTROL`: Demandas e scripts da aplicacao Control.
+- `14_DRE_Caixa`: Consultas e estudos de DRE de caixa.
+- `15_CMC`: Objetos de custo medio de compra.
+- `16_MonitorFront`: Consultas e propostas para Monitor CissFront.
+- `17_GEFOX`: Ajustes e documentacoes do projeto GEFOX.
+- `18_Validação_Notas`: Validacao de notas fiscais e comparativos tributarios.
+- `Cards`: Anotacoes rapidas e listas de acompanhamento.
 
-| Diretorio | Assunto | Instrucoes |
-| --- | --- | --- |
-| `00_referencias` | Referencias de ambiente, conexoes e bases acessiveis | Use para notas de infraestrutura, catalogos de conexao e informacoes que apoiam mais de um assunto. Nao registrar senhas. |
-| `01_padroes_sql` | Padrao de desenvolvimento e formatacao SQL | Use para guias, exemplos base, configuracoes de formatter e convencoes de DDL/DML. Consulte antes de reformatar scripts. |
-| `02_taxas_administradoras` | Arquitetura e objetos de historico de taxas de administradoras | Use para documentacao, DER e objetos SQL da solucao de taxas por administradora/bandeira/parcela. |
-| `03_produto_fornecedor` | Consulta e analise de produto x fornecedor | Use para consultas, evidencias e CSVs relacionados a produto, fornecedor, precificacao e analises de SQL corrente desse tema. |
-| `04_pedido_compra` | Procedure, views e ajustes de pedido de compra | Use para `SP_INSERT_PEDIDO_COMPRA_PROD`, views GEA, backups ou versoes de apoio das rotinas de pedido de compra. |
-| `05_wms` | Integracao WMS, conferencia de pedido e views de entrada | Use para funcoes, triggers e views que controlam uso de WMS ou geram entrada WMS. |
-| `06_cenario_fiscal` | Cenario fiscal e origem do produto | Use para funcoes e consultas relacionadas a busca de origem fiscal, composicao de cenario e regras fiscais por produto/empresa. |
-| `07_validade_fifo` | Controle de validade FIFO | Use para procedures e estudos de consumo/saldo por validade em ordem FIFO. |
-| `08_tickets_ciss` | Scripts vinculados a tickets CISS | Use para scripts identificados por numero de ticket, especialmente quando alteram mais de uma tabela ou regra. |
-| `09_catalogo_dbadmin` | Exportacao/catalogo do DbAdmin | Use para scripts e resultados exportados do catalogo DbAdmin. Atualizacoes devem manter script e saida juntos. |
-| `10_integracoes_integrin` | Integracoes INTEGRIM/Integrin | Use para funcoes e migrations ligadas ao schema `INTEGRIM` e a rotinas de integracao externa. |
-| `11_Artigos` | Artigos e resumos tecnicos | Use para textos, resumos e estudos que nao sejam scripts executaveis de banco. |
-| `12_CONTROL` | Demandas e scripts da aplicacao Control | Use para alteracoes vinculadas ao Control, incluindo scripts de DDL/DML e procedures auxiliares. |
-| `14_DRE_Caixa` | Consultas e estudos de DRE de caixa | Use para scripts de DRE, visoes sinteticas e comparativos de totais relacionados a caixa. |
-| `15_CMC` | Objetos de custo medio de compra | Use para tabelas, funcoes, procedures e triggers relacionadas ao processamento de CMC. |
-| `16_MonitorFront` | Consultas de produtos para Monitor CissFront | Use para consultas de carga de produtos do frente de caixa, com ou sem cenario fiscal, e versoes ajustadas para multiplas empresas. |
-| `17_GEFOX` | Ajustes e documentacoes do projeto GEFOX | Use para scripts, versoes e documentacoes relacionadas aos objetos ajustados para GEFOX. |
+## Arquivos imediatos
 
-## Arquivos por diretorio
+- `.gitignore`: Regras de arquivos ignorados pelo Git.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `top10_fornecedores_notas_compra.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `UF_PRODUTOS_SALDO_ESTOQUE_EMPRESA.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `validacao_baixas_contabil_queiroz.csv`: Resultado ou evidencia em formato CSV.
+- `validacao_baixas_contabil_queiroz.del`: Resultado ou evidencia em formato DEL.
+- `validacao_baixas_contabil_queiroz.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
-### `00_referencias`
+## Inventario de diretorios
 
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `BASES_ACESSIVEIS.md`: conexoes Db2 e SQLTools identificadas no ambiente.
-- `METODO_CONEXAO_DB2.md`: metodo recomendado para catalogar, conectar e executar consultas Db2 via `db2cmd` no Windows.
+| Diretorio | Arquivos | Subdiretorios | Mapa local | Assunto |
+| --- | ---: | ---: | --- | --- |
+| `.agents` | 1 | 0 | sim | Arquivos locais de apoio a agentes do workspace. |
+| `.codex` | 1 | 0 | sim | Arquivos locais de configuracao e apoio do Codex neste workspace. |
+| `.vscode` | 3 | 0 | sim | Configuracoes do Visual Studio Code para o projeto. |
+| `00_referencias` | 3 | 0 | sim | Referencias de ambiente, conexoes e bases acessiveis. |
+| `01_padroes_sql` | 6 | 0 | sim | Padroes de desenvolvimento, formatacao e boas praticas SQL. |
+| `02_taxas_administradoras` | 5 | 0 | sim | Arquitetura e objetos de historico de taxas de administradoras. |
+| `03_produto_fornecedor` | 2 | 0 | sim | Consultas e analises de produto x fornecedor. |
+| `04_pedido_compra` | 5 | 0 | sim | Procedures, views e ajustes de pedido de compra. |
+| `05_wms` | 5 | 0 | sim | Integracao WMS, conferencia de pedido e views de entrada. |
+| `06_cenario_fiscal` | 2 | 0 | sim | Cenario fiscal e origem do produto. |
+| `07_validade_fifo` | 2 | 0 | sim | Controle de validade FIFO. |
+| `08_tickets_ciss` | 30 | 0 | sim | Scripts, evidencias e documentacao vinculados a tickets CISS. |
+| `09_catalogo_dbadmin` | 2 | 1 | sim | Exportacao e catalogo do DbAdmin. |
+| `09_catalogo_dbadmin\dbadmin_catalog` | 1 | 0 | sim | Saida do catalogo exportado do DbAdmin. |
+| `10_integracoes_integrin` | 2 | 0 | sim | Integracoes INTEGRIM/Integrin. |
+| `11_Artigos` | 6 | 0 | sim | Artigos, estudos e resumos tecnicos. |
+| `12_CONTROL` | 2 | 0 | sim | Demandas e scripts da aplicacao Control. |
+| `14_DRE_Caixa` | 3 | 0 | sim | Consultas e estudos de DRE de caixa. |
+| `15_CMC` | 7 | 0 | sim | Objetos de custo medio de compra. |
+| `16_MonitorFront` | 12 | 0 | sim | Consultas e propostas para Monitor CissFront. |
+| `17_GEFOX` | 5 | 0 | sim | Ajustes e documentacoes do projeto GEFOX. |
+| `18_Validação_Notas` | 12 | 0 | sim | Validacao de notas fiscais e comparativos tributarios. |
+| `Cards` | 3 | 0 | sim | Anotacoes rapidas e listas de acompanhamento. |
 
-### `01_padroes_sql`
+## Regras locais
 
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `.sql-formatter.json`: configuracao do formatter SQL.
-- `SQL_FORMATTING_GUIDELINES.md`: diretrizes de indentacao e estilo SQL.
-- `ExemploBaseIdentacao.sql`: exemplo base de indentacao SQL.
-- `PadraoDevBD.sql`: regras gerais de desenvolvimento de banco.
-
-### `02_taxas_administradoras`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `ArquiteturaTaxasAdministradoras.md`: desenho funcional/tecnico da solucao.
-- `DER_TaxasAdministradoras.svg`: diagrama visual do modelo.
-- `ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.sql`: script completo da tabela historica, function de consulta e configuracao.
-- `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: function de consulta de taxa por data historica.
-
-### `03_produto_fornecedor`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `ConsultaProdutoxFornecedor.sql`: consulta principal de produto x fornecedor.
-
-### `04_pedido_compra`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `SP_INSERT_PEDIDO_COMPRA_PROD.sql`: procedure principal.
-- `SP_INSERT_PEDIDO_COMPRA_PROD_bkp10072026.sql`: backup datado da procedure.
-- `VW_GEA_PEDIDO_COMPRA.sql`: view de pedido de compra para integracao GEA.
-- `VW_GEA_PEDIDO_COMPRA_ALTERADO.sql`: view alterada de pedido de compra para integracao GEA.
-
-### `05_wms`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `UF_CONFERE_PEDIDO_UTILIZA_WMS.sql`: function que decide uso de WMS na conferencia de pedido.
-- `TR_INS_CONFPED_PERSON.sql`: trigger de insercao em conferencia de pedido.
-- `V_WMS_ENTRADA.sql`: view WMS de entrada.
-- `V_WMS_ENTRADA_V2.sql`: segunda versao da view WMS de entrada.
-
-### `06_cenario_fiscal`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `UF_ORIGEM_PRODUTO_CENARIO_FISCAL.sql`: function para resolver origem do produto no cenario fiscal.
-
-### `07_validade_fifo`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `ControleValidadeFIFO.sql`: procedure de processamento de validade FIFO.
-
-### `08_tickets_ciss`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `CISS-172088.sql`: script associado ao ticket CISS-172088.
-- `CISS-174814.sql`: script associado ao ticket CISS-174814.
-- `CISS-175870.sql`: script associado ao ticket CISS-175870.
-
-### `09_catalogo_dbadmin`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `export_dbadmin_catalog.ps1`: script de exportacao do catalogo.
-- `dbadmin_catalog/`: saida/catalogo exportado.
-
-### `10_integracoes_integrin`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `V46__function_set_item_pedido_integrin_v2.sql`: migration/function `INTEGRIM.SET_ITEM_PEDIDO_INTEGRIN_V2`.
-
-### `11_Artigos`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `resumo_9_must_have_skills_for_codex_2026.md`: resumo tecnico sobre skills essenciais para Codex em 2026.
-
-### `12_CONTROL`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `SP_ATUALIZA_QTDALTERACOESMANUAIS_CONFERE_PEDIDO.sql`: script para criar o campo `QTDALTERACOESMANUAIS`, atualizar nulos em lotes e aplicar `NOT NULL`.
-
-### `14_DRE_Caixa`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `DRE_Novo.sql`: consulta/script principal da nova DRE de caixa.
-- `DRE_Novo_sintetico_totais.sql`: versao sintetica com totais da nova DRE de caixa.
-
-### `15_CMC`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `ObjetosCMC.sql`: objetos para processamento de custo medio de compra, incluindo tabelas, indices, function, procedure e triggers.
-- `ObjetosCMC_v2.sql`: recorte com objetos novos e objetos alterados em relacao a primeira versao do Git.
-- `Detalhamento_Alteracoes_ObjetosCMC.md`: documentacao das mudancas, dicionario das novas tabelas e roteiro de validacao.
-- `DER_Agrupamento_Custo_CMC.mmd`: DER Mermaid das tabelas de agrupamento de custo para CMC.
-- `DER_Agrupamento_Custo_CMC.svg`: renderizacao SVG do DER de agrupamento de custo para CMC.
-
-### `16_MonitorFront`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `SelectProdutosComCenarioFiscal.txt`: consulta original de produtos com tributacao por cenario fiscal.
-- `SelectProdutosComCenarioFiscal_v2.txt`: versao ajustada para carregar todas as empresas via CTE `EMPRESAS_BASE`.
-- `SelectProdutosSemCenarioFiscal.txt`: consulta original de produtos sem tributacao por cenario fiscal.
-- `SelectProdutosSemCenarioFiscal_v2.txt`: versao ajustada para carregar todas as empresas via CTE `EMPRESAS_BASE`.
-- `Validacao_TSTPONTO_2026-07-23.md`: registro da validacao executada na base `TSTPONTO`.
-- `validar_monitorfront_db2clp.ps1`: script de validacao via Db2 CLP para medir filtros na CTE.
-- `validar_monitorfront.ps1`: script auxiliar de validacao via ODBC.
-
-### `17_GEFOX`
-
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
-- `SP_INSERT_PEDIDO_COMPRA_NEW_16072026.txt`: arquivo original da procedure de gravacao de pedido de compra.
-- `SP_INSERT_PEDIDO_COMPRA_NEW_29072026.sql`: nova versao com function de validacao de COI liberado por empresa.
-- `Documentacao_Jira_COI_Pedido_Compra.md`: documentacao da melhoria para detalhamento tecnico/funcional no projeto do Jira.
+- Atualize este mapa quando diretorios forem criados, removidos ou reclassificados.
+- Atualize os mapas locais quando arquivos forem adicionados, removidos ou renomeados.

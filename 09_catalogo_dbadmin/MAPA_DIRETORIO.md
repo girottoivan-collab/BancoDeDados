@@ -1,17 +1,19 @@
-# Mapa do diretorio 09_catalogo_dbadmin
+﻿# Mapa do diretorio 09_catalogo_dbadmin
 
 ## Objetivo
 
-Organizar scripts e resultados de exportacao/catalogo do DbAdmin.
+Exportacao e catalogo do DbAdmin.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `dbadmin_catalog/`: saida/catalogo exportado.
-- `export_dbadmin_catalog.ps1`: script de exportacao do catalogo.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- `dbadmin_catalog`: Saida do catalogo exportado do DbAdmin.
+
+## Arquivos imediatos
+
+- `export_dbadmin_catalog.ps1`: Script PowerShell de apoio, exportacao ou validacao.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
 
 ## Regras locais
 
-- Mantenha script de exportacao e saida exportada juntos.
-- Atualizacoes do catalogo devem preservar a relacao entre comando usado e arquivos gerados.
-- Nao coloque aqui scripts de alteracao de banco que nao sejam parte do processo de catalogacao.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

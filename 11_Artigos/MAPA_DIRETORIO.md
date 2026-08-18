@@ -1,16 +1,23 @@
-# Mapa do diretorio 11_Artigos
+﻿# Mapa do diretorio 11_Artigos
 
 ## Objetivo
 
-Guardar artigos, resumos tecnicos e materiais de estudo que nao sejam scripts executaveis de banco.
+Artigos, estudos e resumos tecnicos.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `resumo_9_must_have_skills_for_codex_2026.md`: resumo tecnico sobre skills essenciais para Codex em 2026.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `analise_risco_fragmentacao_schema_dba_noponto.md`: Documentacao tecnica ou registro de analise.
+- `estudo_notas_entrada_saida_bigsm_tamanho_pagina_db2.md`: Documentacao tecnica ou registro de analise.
+- `estudo_notas_entrada_saida_tamanho_pagina_db2.md`: Documentacao tecnica ou registro de analise.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `resumo_9_must_have_skills_for_codex_2026.md`: Documentacao tecnica ou registro de analise.
+- `tamanho_paginas_db2_e_risco_overflow_linha.md`: Documentacao tecnica ou registro de analise.
 
 ## Regras locais
 
-- Use este diretorio para textos de apoio, estudos e resumos.
-- Evite misturar documentacao operacional de uma solucao especifica; ela deve ficar junto do diretorio da solucao.
-- Ao renomear artigos, mantenha o titulo descritivo e sem depender apenas de datas.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

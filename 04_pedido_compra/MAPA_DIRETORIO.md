@@ -1,19 +1,22 @@
-# Mapa do diretorio 04_pedido_compra
+﻿# Mapa do diretorio 04_pedido_compra
 
 ## Objetivo
 
-Organizar procedure, views, backups e ajustes relacionados a pedido de compra.
+Procedures, views e ajustes de pedido de compra.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `SP_INSERT_PEDIDO_COMPRA_PROD.sql`: procedure principal.
-- `SP_INSERT_PEDIDO_COMPRA_PROD_bkp10072026.sql`: backup datado da procedure.
-- `VW_GEA_PEDIDO_COMPRA.sql`: view de pedido de compra para integracao GEA.
-- `VW_GEA_PEDIDO_COMPRA_ALTERADO.sql`: view alterada de pedido de compra para integracao GEA.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `SP_INSERT_PEDIDO_COMPRA_PROD.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `SP_INSERT_PEDIDO_COMPRA_PROD_bkp10072026.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `VW_GEA_PEDIDO_COMPRA.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `VW_GEA_PEDIDO_COMPRA_ALTERADO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 
-- Preserve backups datados ao lado da rotina principal.
-- Views GEA e procedure de pedido devem permanecer juntas quando fizerem parte da mesma entrega.
-- Scripts que afetem WMS devem ir para `05_wms`, salvo quando forem parte inseparavel da rotina de pedido.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

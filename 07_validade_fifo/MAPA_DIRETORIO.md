@@ -1,16 +1,19 @@
-# Mapa do diretorio 07_validade_fifo
+﻿# Mapa do diretorio 07_validade_fifo
 
 ## Objetivo
 
-Organizar procedures e estudos de consumo/saldo por validade em ordem FIFO.
+Controle de validade FIFO.
 
-## Conteudo
+## Subdiretorios imediatos
 
-- `ControleValidadeFIFO.sql`: procedure de processamento de validade FIFO.
-- `MAPA_DIRETORIO.md`: este mapa local.
+- Nenhum subdiretorio imediato.
+
+## Arquivos imediatos
+
+- `ControleValidadeFIFO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
 
 ## Regras locais
 
-- Mantenha scripts de saldo, consumo e validade juntos quando tratarem do mesmo fluxo FIFO.
-- Backups ou comparativos devem indicar data ou criterio de diferenca.
-- Evite misturar ajustes de WMS sem relacao direta com validade.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.

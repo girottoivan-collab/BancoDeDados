@@ -1,44 +1,29 @@
-# Mapa do diretorio 16_MonitorFront
-
-Consultas de produtos para o Monitor CissFront, usadas pela aplicacao de emissao de venda em frente de caixa.
+﻿# Mapa do diretorio 16_MonitorFront
 
 ## Objetivo
 
-- Manter as consultas originais de captura de produtos.
-- Manter versoes ajustadas para buscar produtos de todas as empresas da base.
-- Centralizar notas de validacao das consultas neste diretorio.
+Consultas e propostas para Monitor CissFront.
 
-## Arquivos
+## Subdiretorios imediatos
 
-- `SelectProdutosComCenarioFiscal.txt`: consulta original para bases/formatos que usam tributacao por cenario fiscal.
-- `SelectProdutosComCenarioFiscal_v2.txt`: versao ajustada para usar a CTE `EMPRESAS_BASE` e resolver filtros de empresa/UF por empresa da base.
-- `SelectProdutosSemCenarioFiscal.txt`: consulta original para bases/formatos que usam tributacao sem cenario fiscal.
-- `SelectProdutosSemCenarioFiscal_v2.txt`: versao ajustada para usar a CTE `EMPRESAS_BASE` e resolver filtros de empresa/UF por empresa da base.
-- `Validacao_TSTPONTO_2026-07-23.md`: registro da validacao executada na base `TSTPONTO`, com tempos, volumes e observacoes.
-- `validar_monitorfront_db2clp.ps1`: script de validacao via Db2 CLP; recebe a senha por parametro e nao a persiste em arquivo.
-- `validar_monitorfront.ps1`: tentativa de validacao via ODBC com host/porta explicitos; mantido como apoio, mas a validacao efetiva foi feita pelo CLP.
-- `MAPA_DIRETORIO.md`: mapa local do diretorio.
+- Nenhum subdiretorio imediato.
 
-## Ajuste v2
+## Arquivos imediatos
 
-- A CTE `EMPRESAS_BASE` consulta `DBA.EMPRESA` e fornece `IDEMPRESA` e `UF` para substituir os filtros fixos por `:RA_IDEMPRESA` e `:RA_UF`.
-- Caso seja necessario processar somente algumas empresas, aplique o filtro diretamente dentro de `EMPRESAS_BASE`, por exemplo `WHERE EMPRESA.IDEMPRESA IN (...)`.
-- Na consulta com cenario fiscal, a CTE tambem carrega campos fiscais necessarios aos joins ja existentes: `IDATIVIDADE`, `IDREGIMEESPECIAL` e `TIPOREGIMETRIBFEDERAL`.
-- As funcoes e subconsultas dependentes de empresa passam a usar a empresa da linha corrente (`TMP.IDEMPRESA`, `PPP.IDEMPRESA`, `POLITICA_PRECO_PRODUTO.IDEMPRESA` ou `EMPRESA.IDEMPRESA`, conforme o escopo).
-- Os joins auxiliares de empresa e mix por `DBA.PRODUTO_EMPRESA` tambem devem permanecer vinculados a `EMPRESAS_BASE`, para que filtros aplicados na CTE limitem todo o resultado.
-- O parametro `:RA_DTMONITOR` foi mantido para controle incremental de alteracoes.
-- O parametro `:RA_COMPLETA` foi mantido para preservar o comportamento original de carga completa/inativos.
-
-## Base para validacao
-
-- Host: `163.176.143.73`
-- Banco: `TSTPONTO`
-- Porta: `49470`
-- Usuario: `dba`
-- Senha: informada na demanda, nao registrada neste arquivo para evitar persistencia de credencial no repositorio.
+- `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `Objetos_Cache_CenarioFiscal.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
+- `Proposta_Cache_CenarioFiscal.md`: Documentacao tecnica ou registro de analise.
+- `SelectProdutosComCenarioFiscal.txt`: Texto, consulta ou anotacao de apoio.
+- `SelectProdutosComCenarioFiscal_v2.txt`: Texto, consulta ou anotacao de apoio.
+- `SelectProdutosComCenarioFiscal_v3_cache.txt`: Texto, consulta ou anotacao de apoio.
+- `SelectProdutosSemCenarioFiscal.txt`: Texto, consulta ou anotacao de apoio.
+- `SelectProdutosSemCenarioFiscal_v2.txt`: Texto, consulta ou anotacao de apoio.
+- `Validacao_TSTPONTO_2026-07-23.md`: Documentacao tecnica ou registro de analise.
+- `validar_comparativo_linhas.ps1`: Script PowerShell de apoio, exportacao ou validacao.
+- `validar_monitorfront.ps1`: Script PowerShell de apoio, exportacao ou validacao.
+- `validar_monitorfront_db2clp.ps1`: Script PowerShell de apoio, exportacao ou validacao.
 
 ## Regras locais
 
-- Nao alterar os arquivos originais sem necessidade explicita.
-- Criar novas versoes com sufixo ou prefixo de versao, mantendo o arquivo original como referencia.
-- Ao validar em banco, registrar aqui apenas ambiente, data, resultado e observacoes, sem salvar senha ou dados sensiveis.
+- Atualize este mapa quando arquivos ou subpastas deste diretorio forem adicionados, removidos ou renomeados.
+- Mantenha arquivos relacionados ao mesmo assunto juntos para facilitar busca e versionamento.
