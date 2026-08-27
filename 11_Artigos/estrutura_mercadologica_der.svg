@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
+  <title id="title">DER da nova Estrutura Mercadologica</title>
+  <desc id="desc">Diagrama entidade-relacionamento das tabelas CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA, ESTRUTURA_MERCADOLOGICA, ESTRUTURA_MERCADOLOGICA_NIVEIS e DIVISAO.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f6f8fb; }
+      .entity { fill: #ffffff; stroke: #27364a; stroke-width: 2; rx: 8; }
+      .title { fill: #27364a; font: 700 18px Arial, sans-serif; }
+      .subtitle { fill: #506070; font: 13px Arial, sans-serif; }
+      .field { fill: #202a36; font: 14px Consolas, monospace; }
+      .pk { fill: #0b6bcb; font-weight: 700; }
+      .fk { fill: #a04f00; font-weight: 700; }
+      .note { fill: #ffffff; stroke: #6d7684; stroke-width: 1.5; rx: 8; }
+      .note-title { fill: #1f2b3a; font: 700 15px Arial, sans-serif; }
+      .note-text { fill: #344255; font: 13px Arial, sans-serif; }
+      .rel { stroke: #27364a; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .rel-dash { stroke: #27364a; stroke-width: 2.2; fill: none; stroke-dasharray: 7 5; marker-end: url(#arrow); }
+      .label { fill: #27364a; font: 13px Arial, sans-serif; }
+      .level { fill: #e8f2ff; stroke: #0b6bcb; stroke-width: 1.5; rx: 7; }
+      .level-text { fill: #17324d; font: 13px Arial, sans-serif; }
+      .muted { fill: #6b7788; font: 12px Arial, sans-serif; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#27364a"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1320" height="860"/>
+  <text class="title" x="40" y="42">Nova Estrutura Mercadologica de Produtos</text>
+  <text class="subtitle" x="40" y="66">Modelo recursivo limitado a 8 niveis: 4 niveis superiores configuraveis + Divisao, Secao, Grupo e Sub-Grupo.</text>
+
+  <rect class="entity" x="60" y="120" width="410" height="190"/>
+  <text class="title" x="82" y="152">CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA</text>
+  <text class="field pk" x="82" y="190">PK  IDNIVELESTRUTURA</text>
+  <text class="field" x="82" y="220">    DESCRNIVEL</text>
+  <text class="field" x="82" y="250">    DTALTERACAO</text>
+  <text class="subtitle" x="82" y="286">Catalogo dos niveis permitidos na arvore.</text>
+
+  <rect class="entity" x="570" y="120" width="390" height="190"/>
+  <text class="title" x="592" y="152">ESTRUTURA_MERCADOLOGICA</text>
+  <text class="field pk" x="592" y="190">PK  IDESTRUTURA</text>
+  <text class="field" x="592" y="220">    DESCRESTRUTURA</text>
+  <text class="field fk" x="592" y="250">FK  IDESTRUTURAPAI</text>
+  <text class="subtitle" x="592" y="286">Nos da arvore; aponta para o proprio pai.</text>
+
+  <rect class="entity" x="570" y="440" width="390" height="180"/>
+  <text class="title" x="592" y="472">ESTRUTURA_MERCADOLOGICA_NIVEIS</text>
+  <text class="field pk fk" x="592" y="510">PK/FK  IDNIVELESTRUTURA</text>
+  <text class="field pk fk" x="592" y="540">PK/FK  IDESTRUTURA</text>
+  <text class="subtitle" x="592" y="578">Associa cada no da arvore ao seu nivel.</text>
+
+  <rect class="entity" x="1040" y="440" width="230" height="190"/>
+  <text class="title" x="1062" y="472">DIVISAO</text>
+  <text class="field pk" x="1062" y="510">PK  IDDIVISAO</text>
+  <text class="field" x="1062" y="540">    DESCRDIVISAO</text>
+  <text class="field fk" x="1062" y="570">FK  IDNIVELESTRUTURA</text>
+  <text class="field fk" x="1062" y="600">FK  IDESTRUTURAPAI</text>
+
+  <path class="rel" d="M 470 215 C 525 215, 520 480, 570 500"/>
+  <text class="label" x="420" y="392">1 nivel para N associacoes</text>
+
+  <path class="rel" d="M 765 310 L 765 440"/>
+  <text class="label" x="780" y="382">1 estrutura para N associacoes</text>
+
+  <path class="rel-dash" d="M 960 215 C 1015 215, 1015 125, 960 125"/>
+  <text class="label" x="990" y="170">auto FK: pai/filho</text>
+
+  <path class="rel" d="M 960 520 L 1040 570"/>
+  <text class="label" x="977" y="535">nivel da divisao</text>
+
+  <path class="rel" d="M 960 250 C 1060 270, 1110 360, 1135 440"/>
+  <text class="label" x="1040" y="330">no da arvore</text>
+
+  <rect class="note" x="60" y="390" width="410" height="330"/>
+  <text class="note-title" x="82" y="422">Valores possiveis de nivel</text>
+  <rect class="level" x="84" y="452" width="350" height="28"/>
+  <text class="level-text" x="96" y="471">8 - Nivel Superior 4: acima da Divisao</text>
+  <rect class="level" x="84" y="486" width="350" height="28"/>
+  <text class="level-text" x="96" y="505">7 - Nivel Superior 3: acima da Divisao</text>
+  <rect class="level" x="84" y="520" width="350" height="28"/>
+  <text class="level-text" x="96" y="539">6 - Nivel Superior 2: acima da Divisao</text>
+  <rect class="level" x="84" y="554" width="350" height="28"/>
+  <text class="level-text" x="96" y="573">5 - Nivel Superior 1: acima da Divisao</text>
+  <rect class="level" x="84" y="588" width="350" height="28"/>
+  <text class="level-text" x="96" y="607">4 - Divisao: nivel legado</text>
+  <rect class="level" x="84" y="622" width="350" height="28"/>
+  <text class="level-text" x="96" y="641">3 - Secao: nivel legado</text>
+  <rect class="level" x="84" y="656" width="350" height="28"/>
+  <text class="level-text" x="96" y="675">2 - Grupo: nivel legado</text>
+  <rect class="level" x="84" y="690" width="350" height="28"/>
+  <text class="level-text" x="96" y="709">1 - Sub-Grupo: nivel legado</text>
+  <text class="muted" x="82" y="746">Os nomes dos 4 niveis superiores podem variar por configuracao.</text>
+
+  <rect class="note" x="570" y="680" width="700" height="110"/>
+  <text class="note-title" x="592" y="712">Regra de montagem da arvore</text>
+  <text class="note-text" x="592" y="742">Criar primeiro o no pai em ESTRUTURA_MERCADOLOGICA, classificar seu nivel em ESTRUTURA_MERCADOLOGICA_NIVEIS,</text>
+  <text class="note-text" x="592" y="766">e entao criar os filhos apontando IDESTRUTURAPAI para o no superior. DIVISAO referencia o nivel e o no da arvore.</text>
+</svg>

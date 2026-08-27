@@ -1,4 +1,4 @@
-﻿# Mapa do diretorio 09_catalogo_dbadmin\dbadmin_catalog
+﻿# Mapa do diretorio dbadmin_catalog
 
 ## Objetivo
 

@@ -1,0 +1,87 @@
+select '##DIVISAO_TESTE' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##DIVISAO_TESTE            
+
+  1 registro(s) selecionado(s).
+
+
+select min(IDDIVISAO) from DBA.DIVISAO
+
+1          
+-----------
+          1
+
+  1 registro(s) selecionado(s).
+
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA (IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI) values (900000001, 'TESTE MANUAL - DIVISAO', null)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS (IDNIVELESTRUTURA, IDESTRUTURA) values (4, 900000001)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA (IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI) values (900000002, 'TESTE MANUAL - SECAO', 900000001)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS (IDNIVELESTRUTURA, IDESTRUTURA) values (3, 900000002)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA (IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI) values (900000003, 'TESTE MANUAL - GRUPO', 900000002)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS (IDNIVELESTRUTURA, IDESTRUTURA) values (2, 900000003)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA (IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI) values (900000004, 'TESTE MANUAL - SUB-GRUPO', 900000003)
+DB20000I  O comando SQL terminou com sucesso.
+
+insert into DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS (IDNIVELESTRUTURA, IDESTRUTURA) values (1, 900000004)
+DB20000I  O comando SQL terminou com sucesso.
+
+update DBA.DIVISAO set IDNIVELESTRUTURA = 4, IDESTRUTURAPAI = 900000001 where IDDIVISAO = (select min(IDDIVISAO) from DBA.DIVISAO)
+DB20000I  O comando SQL terminou com sucesso.
+
+select '##ARVORE_TESTE' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##ARVORE_TESTE             
+
+  1 registro(s) selecionado(s).
+
+
+select e.IDESTRUTURA, e.DESCRESTRUTURA, e.IDESTRUTURAPAI, n.IDNIVELESTRUTURA, c.DESCRNIVEL from DBA.ESTRUTURA_MERCADOLOGICA e join DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS n on n.IDESTRUTURA = e.IDESTRUTURA join DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA c on c.IDNIVELESTRUTURA = n.IDNIVELESTRUTURA where e.IDESTRUTURA between 900000001 and 900000004 order by e.IDESTRUTURA
+
+IDESTRUTURA DESCRESTRUTURA                                                                                                                                                                                                                                                  IDESTRUTURAPAI IDNIVELESTRUTURA DESCRNIVEL                                                                                                                                                                                              
+----------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------- ---------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  900000001 TESTE MANUAL - DIVISAO                                                                                                                                                                                                                                                       -                4 Divisão                                                                                                                                                                                                 
+  900000002 TESTE MANUAL - SECAO                                                                                                                                                                                                                                                 900000001                3 Seção                                                                                                                                                                                                   
+  900000003 TESTE MANUAL - GRUPO                                                                                                                                                                                                                                                 900000002                2 Grupo                                                                                                                                                                                                   
+  900000004 TESTE MANUAL - SUB-GRUPO                                                                                                                                                                                                                                             900000003                1 Sub-Grupo                                                                                                                                                                                               
+
+  4 registro(s) selecionado(s).
+
+
+select '##DIVISAO_LINK_TESTE' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##DIVISAO_LINK_TESTE       
+
+  1 registro(s) selecionado(s).
+
+
+select d.IDDIVISAO, d.DESCRDIVISAO, d.IDNIVELESTRUTURA, d.IDESTRUTURAPAI, e.DESCRESTRUTURA from DBA.DIVISAO d left join DBA.ESTRUTURA_MERCADOLOGICA e on e.IDESTRUTURA = d.IDESTRUTURAPAI where d.IDDIVISAO = (select min(IDDIVISAO) from DBA.DIVISAO)
+
+IDDIVISAO   DESCRDIVISAO                             IDNIVELESTRUTURA IDESTRUTURAPAI DESCRESTRUTURA                                                                                                                                                                                                                                                 
+----------- ---------------------------------------- ---------------- -------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          1 ALIMENTOS                                               4      900000001 TESTE MANUAL - DIVISAO                                                                                                                                                                                                                                         
+
+  1 registro(s) selecionado(s).
+
+
+rollback
+DB20000I  O comando SQL terminou com sucesso.
+

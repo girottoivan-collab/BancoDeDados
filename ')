@@ -1,0 +1,3 @@
+SQL0010N  A cadeia constante iniciada por "'-, varchar(idcliforsecundario)), 
+flaginativo from dba.agrupamento_cli" não possui um delimitador de fim de 
+cadeia.  SQLSTATE=42603

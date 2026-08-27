@@ -10,7 +10,7 @@ Padroes de desenvolvimento, formatacao e boas praticas SQL.
 
 ## Arquivos imediatos
 
-- `.sql-formatter.json`: Configuracao do formatador SQL.
+- `.sql-formatter.json`: Arquivo de apoio, evidencia ou saida avulsa.
 - `DB2_PAGE_SIZE_E_BOAS_PRATICAS.md`: Documentacao tecnica ou registro de analise.
 - `ExemploBaseIdentacao.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.

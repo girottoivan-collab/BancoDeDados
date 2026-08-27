@@ -59,15 +59,27 @@ Alteracao aplicada:
 
 A procedure de atualizacao deve recalcular as linhas usando a mesma regra fiscal da consulta v2. A mudanca de arquitetura e somente deslocar esse custo para um processamento controlado, antes da consulta do Monitor Front.
 
-Fluxo recomendado:
+Fluxo recomendado sem controle de pendencia:
 
-1. Identificar empresas/produtos/subprodutos impactados por alteracao em produto, grade ou cenario.
-2. Reexecutar a regra fiscal original somente para as chaves impactadas.
-3. Fazer `MERGE` na tabela `PRODUTO_GRADE_CENARIO_FISCAL`.
-4. Marcar como `FLAGVALIDO = 'F'` as linhas que deixarem de se enquadrar em qualquer regra.
-5. Executar a consulta v3 apenas para linhas com cache valido.
+1. Uma aplicacao ou rotina agendada chama a procedure sem parametros.
+2. A procedure le `DTULTPROCESSAMENTO` em `DBA.MONITORFRONT_CENFIS_CONTROLE`.
+3. A procedure processa a consulta base para itens com data de alteracao posterior ao ultimo processamento.
+4. Fazer `MERGE` na tabela `PRODUTO_GRADE_CENARIO_FISCAL`.
+5. Ao final, gravar o timestamp da execucao atual em `MONITORFRONT_CENFIS_CONTROLE`.
+6. Executar a consulta v3 apenas para linhas com cache valido.
 
-Para evitar que triggers executem a regra fiscal completa dentro da transacao operacional, a sugestao e usar uma fila simples de pendencias e uma procedure processada por rotina agendada.
+Fluxo recomendado com controle de pendencia:
+
+1. Triggers em tabelas fiscais fazem `MERGE` das chaves em `DBA.MONITORFRONT_CENFIS_PENDENTE`, mantendo somente produtos ainda pendentes.
+2. Uma rotina agendada chama `DBA.SP_MONITORFRONT_PROCESSA_PEND_CENFIS`.
+3. A rotina processa as chaves pendentes e chama `DBA.SP_MONITORFRONT_ATUALIZA_CENFIS`.
+4. A rotina grava o processamento em `DBA.MONITORFRONT_CENFIS_HISTORICO` e remove a chave da tabela de pendentes.
+5. A regra fiscal completa continua fora da transacao de cadastro.
+
+Foram separadas duas versoes de implementacao:
+
+- `Objetos_Cache_CenarioFiscal_sem_pendencia.sql`: nao cria fila nem triggers. A procedure nao possui parametros e usa tabela de controle de ultimo processamento.
+- `Objetos_Cache_CenarioFiscal_com_pendencia.sql`: cria tabela de pendentes por `IDEMPRESA`, `IDPRODUTO` e `IDSUBPRODUTO`, tabela de historico, procedure de processamento e triggers para remarcar chaves fiscais pendentes.
 
 ## Pontos de atencao
 
@@ -75,6 +87,14 @@ Para evitar que triggers executem a regra fiscal completa dentro da transacao op
 - Alteracoes na regra de origem do produto usada pela `CENARIO_FISCAL_PADRAO_PRODUTO_VW` tambem exigem recarga das chaves afetadas.
 - Se a view `PTCV` puder retornar mais de um cenario para a mesma chave empresa/produto/subproduto, a procedure precisa manter exatamente a mesma cardinalidade esperada pela consulta atual ou aplicar a mesma regra de desempate do sistema.
 - A consulta v3 deve ser homologada comparando quantidade de linhas, chaves e campos fiscais contra a v2 para o mesmo filtro em `EMPRESAS_BASE`.
+- Nesta versao inicial, a tabela de pendentes e exclusiva para mudancas fiscais. Nao foram propostas triggers em `PRODUTO` e `PRODUTO_GRADE`.
+
+## Triggers da versao com pendencia
+
+- `TR_MONFRONT_CENFIS_EMPRESA_AU`: dispara em `DBA.EMPRESA` somente se mudar `UF`, `IDATIVIDADE`, `IDREGIMEESPECIAL` ou `TIPOREGIMETRIBFEDERAL`, enfileirando os produtos padrao vinculados a empresa.
+- `TR_MONFRONT_CENFIS_CENARIO_AI`: dispara em insert de `DBA.CENARIO_FISCAL`, enfileirando somente quando o cenario cadastrado for padrao do produto em alguma empresa.
+- `TR_MONFRONT_CENFIS_CENARIO_AU`: dispara em update de `DBA.CENARIO_FISCAL` somente se mudar campo fiscal retornado na consulta/cache, enfileirando somente quando o cenario alterado for padrao do produto em alguma empresa.
+- As triggers fazem `MERGE` na tabela de pendentes; a procedure grava historico e remove a pendencia processada.
 
 ## Roteiro de validacao
 
@@ -85,4 +105,3 @@ Para evitar que triggers executem a regra fiscal completa dentro da transacao op
 5. Comparar campos fiscais retornados por `PTCV` contra `PGCF`.
 6. Repetir com duas ou mais empresas na CTE para validar que o filtro da CTE limita todos os pontos.
 7. Medir tempo de execucao da v2 contra v3.
-

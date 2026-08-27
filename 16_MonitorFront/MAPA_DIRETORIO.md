@@ -6,16 +6,13 @@ Consultas e propostas para Monitor CissFront.
 
 ## Subdiretorios imediatos
 
-- Nenhum subdiretorio imediato.
+- `Arquitetura_Cache_CenarioFiscal`: Arquitetura proposta de cache de cenario fiscal.
 
 ## Arquivos imediatos
 
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.
-- `Objetos_Cache_CenarioFiscal.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
-- `Proposta_Cache_CenarioFiscal.md`: Documentacao tecnica ou registro de analise.
 - `SelectProdutosComCenarioFiscal.txt`: Texto, consulta ou anotacao de apoio.
 - `SelectProdutosComCenarioFiscal_v2.txt`: Texto, consulta ou anotacao de apoio.
-- `SelectProdutosComCenarioFiscal_v3_cache.txt`: Texto, consulta ou anotacao de apoio.
 - `SelectProdutosSemCenarioFiscal.txt`: Texto, consulta ou anotacao de apoio.
 - `SelectProdutosSemCenarioFiscal_v2.txt`: Texto, consulta ou anotacao de apoio.
 - `Validacao_TSTPONTO_2026-07-23.md`: Documentacao tecnica ou registro de analise.

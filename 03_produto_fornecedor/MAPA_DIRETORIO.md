@@ -12,6 +12,7 @@ Consultas e analises de produto x fornecedor.
 
 - `ConsultaProdutoxFornecedor.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.
+- `UF_VLRFINALFORNECEDOR_AGRUPAMENTO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 
 ## Regras locais
 

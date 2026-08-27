@@ -1,0 +1,163 @@
+select '##CONEXAO' from sysibm.sysdummy1
+
+1        
+---------
+##CONEXAO
+
+  1 registro(s) selecionado(s).
+
+
+select current server, current schema, current user from sysibm.sysdummy1
+
+1                  2                                                                                                                                3                                                                                                                               
+------------------ -------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------
+NOPONTO            DBA                                                                                                                              DBA                                                                                                                             
+
+  1 registro(s) selecionado(s).
+
+
+select '##TABELAS_ENCONTRADAS' from sysibm.sysdummy1
+
+1                    
+---------------------
+##TABELAS_ENCONTRADAS
+
+  1 registro(s) selecionado(s).
+
+
+select tabschema, tabname, type, status from syscat.tables where tabname in ( 'ESTRUTURA_MERCADOLOGICA', 'ESTRUTURA_MERCADOLOGICA_NIVEIS', 'CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA' ) order by tabschema, tabname
+
+TABSCHEMA                                                                                                                        TABNAME                                                                                                                          TYPE STATUS
+-------------------------------------------------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ---- ------
+DBA                                                                                                                              CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA                                                                                            T    N     
+DBA                                                                                                                              ESTRUTURA_MERCADOLOGICA                                                                                                          T    N     
+DBA                                                                                                                              ESTRUTURA_MERCADOLOGICA_NIVEIS                                                                                                   T    N     
+
+  3 registro(s) selecionado(s).
+
+
+select '##COUNTS_DBA' from sysibm.sysdummy1
+
+1                    
+---------------------
+##COUNTS_DBA         
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.ESTRUTURA_MERCADOLOGICA', count(1) from DBA.ESTRUTURA_MERCADOLOGICA
+
+1                           2          
+--------------------------- -----------
+DBA.ESTRUTURA_MERCADOLOGICA           5
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS', count(1) from DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS
+
+1                                  2          
+---------------------------------- -----------
+DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS           5
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA', count(1) from DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA
+
+1                                         2          
+----------------------------------------- -----------
+DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA           6
+
+  1 registro(s) selecionado(s).
+
+
+select '##SAMPLE_ESTRUTURA' from sysibm.sysdummy1
+
+1                    
+---------------------
+##SAMPLE_ESTRUTURA   
+
+  1 registro(s) selecionado(s).
+
+
+select IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI from DBA.ESTRUTURA_MERCADOLOGICA order by IDESTRUTURA fetch first 50 rows only
+
+IDESTRUTURA DESCRESTRUTURA                                                                                                                                                                                                                                                  IDESTRUTURAPAI
+----------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------
+          1 Categoria 1                                                                                                                                                                                                                                                                  4
+          2 Categoria 2                                                                                                                                                                                                                                                                  5
+          3 Categoria 3                                                                                                                                                                                                                                                                  4
+          4 Superior 1                                                                                                                                                                                                                                                                   -
+          5 Superior 2                                                                                                                                                                                                                                                                   -
+
+  5 registro(s) selecionado(s).
+
+
+select '##SAMPLE_NIVEIS' from sysibm.sysdummy1
+
+1                    
+---------------------
+##SAMPLE_NIVEIS      
+
+  1 registro(s) selecionado(s).
+
+
+select IDNIVELESTRUTURA, IDESTRUTURA from DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS order by IDNIVELESTRUTURA, IDESTRUTURA fetch first 50 rows only
+
+IDNIVELESTRUTURA IDESTRUTURA
+---------------- -----------
+               5           1
+               5           2
+               5           3
+               6           4
+               6           5
+
+  5 registro(s) selecionado(s).
+
+
+select '##SAMPLE_CONFIG' from sysibm.sysdummy1
+
+1                    
+---------------------
+##SAMPLE_CONFIG      
+
+  1 registro(s) selecionado(s).
+
+
+select IDNIVELESTRUTURA, DESCRNIVEL, DTALTERACAO from DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA order by IDNIVELESTRUTURA
+
+IDNIVELESTRUTURA DESCRNIVEL                                                                                                                                                                                               DTALTERACAO               
+---------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------------------
+               1 Sub-Grupo                                                                                                                                                                                                2026-05-15-12.14.37.097399
+               2 Grupo                                                                                                                                                                                                    2026-05-15-12.14.37.097399
+               3 Seção                                                                                                                                                                                                    2026-05-15-12.14.37.097399
+               4 Divisão                                                                                                                                                                                                  2026-05-15-12.14.37.097399
+               5 Categoria                                                                                                                                                                                                2026-08-20-11.15.18.521000
+               6 Nivel Superior                                                                                                                                                                                           2026-08-20-11.19.52.036000
+
+  6 registro(s) selecionado(s).
+
+
+select '##ARVORE_JOIN' from sysibm.sysdummy1
+
+1                    
+---------------------
+##ARVORE_JOIN        
+
+  1 registro(s) selecionado(s).
+
+
+select e.IDESTRUTURA, e.DESCRESTRUTURA, e.IDESTRUTURAPAI, n.IDNIVELESTRUTURA, c.DESCRNIVEL from DBA.ESTRUTURA_MERCADOLOGICA e left join DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS n on n.IDESTRUTURA = e.IDESTRUTURA left join DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA c on c.IDNIVELESTRUTURA = n.IDNIVELESTRUTURA order by e.IDESTRUTURA, n.IDNIVELESTRUTURA fetch first 100 rows only
+
+IDESTRUTURA DESCRESTRUTURA                                                                                                                                                                                                                                                  IDESTRUTURAPAI IDNIVELESTRUTURA DESCRNIVEL                                                                                                                                                                                              
+----------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------- ---------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          1 Categoria 1                                                                                                                                                                                                                                                                  4                5 Categoria                                                                                                                                                                                               
+          2 Categoria 2                                                                                                                                                                                                                                                                  5                5 Categoria                                                                                                                                                                                               
+          3 Categoria 3                                                                                                                                                                                                                                                                  4                5 Categoria                                                                                                                                                                                               
+          4 Superior 1                                                                                                                                                                                                                                                                   -                6 Nivel Superior                                                                                                                                                                                          
+          5 Superior 2                                                                                                                                                                                                                                                                   -                6 Nivel Superior                                                                                                                                                                                          
+
+  5 registro(s) selecionado(s).
+
+

@@ -1,0 +1,146 @@
+select '##CONEXAO' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##CONEXAO                  
+
+  1 registro(s) selecionado(s).
+
+
+select current server, current schema, current user from sysibm.sysdummy1
+
+1                  2                                                                                                                                3                                                                                                                               
+------------------ -------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------
+NOPONTO            DBA                                                                                                                              DBA                                                                                                                             
+
+  1 registro(s) selecionado(s).
+
+
+select '##TABELAS_ENCONTRADAS' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##TABELAS_ENCONTRADAS      
+
+  1 registro(s) selecionado(s).
+
+
+select tabschema, tabname, type, status from syscat.tables where tabname in ( 'ESTRUTURA_MERCADOLOGICA', 'ESTRUTURA_MERCADOLOGICA_NIVEIS', 'CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA' ) order by tabschema, tabname
+
+TABSCHEMA                                                                                                                        TABNAME                                                                                                                          TYPE STATUS
+-------------------------------------------------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ---- ------
+DBA                                                                                                                              CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA                                                                                            T    N     
+DBA                                                                                                                              ESTRUTURA_MERCADOLOGICA                                                                                                          T    N     
+DBA                                                                                                                              ESTRUTURA_MERCADOLOGICA_NIVEIS                                                                                                   T    N     
+
+  3 registro(s) selecionado(s).
+
+
+select '##COUNTS_DBA' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##COUNTS_DBA               
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.ESTRUTURA_MERCADOLOGICA', count(1) from DBA.ESTRUTURA_MERCADOLOGICA
+
+1                           2          
+--------------------------- -----------
+DBA.ESTRUTURA_MERCADOLOGICA           0
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS', count(1) from DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS
+
+1                                  2          
+---------------------------------- -----------
+DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS           0
+
+  1 registro(s) selecionado(s).
+
+
+select 'DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA', count(1) from DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA
+
+1                                         2          
+----------------------------------------- -----------
+DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA           4
+
+  1 registro(s) selecionado(s).
+
+
+select '##SAMPLE_ESTRUTURA' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##SAMPLE_ESTRUTURA         
+
+  1 registro(s) selecionado(s).
+
+
+select IDESTRUTURA, DESCRESTRUTURA, IDESTRUTURAPAI from DBA.ESTRUTURA_MERCADOLOGICA order by IDESTRUTURA fetch first 50 rows only
+
+IDESTRUTURA DESCRESTRUTURA                                                                                                                                                                                                                                                  IDESTRUTURAPAI
+----------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------
+
+  0 registro(s) selecionado(s).
+
+
+select '##SAMPLE_NIVEIS' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##SAMPLE_NIVEIS            
+
+  1 registro(s) selecionado(s).
+
+
+select IDNIVELESTRUTURA, IDESTRUTURA from DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS order by IDNIVELESTRUTURA, IDESTRUTURA fetch first 50 rows only
+
+IDNIVELESTRUTURA IDESTRUTURA
+---------------- -----------
+
+  0 registro(s) selecionado(s).
+
+
+select '##SAMPLE_CONFIG' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##SAMPLE_CONFIG            
+
+  1 registro(s) selecionado(s).
+
+
+select IDNIVELESTRUTURA, DESCRNIVEL, DTALTERACAO from DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA order by IDNIVELESTRUTURA
+
+IDNIVELESTRUTURA DESCRNIVEL                                                                                                                                                                                               DTALTERACAO               
+---------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------------------
+               1 Sub-Grupo                                                                                                                                                                                                2026-01-14-10.16.22.863182
+               2 Grupo                                                                                                                                                                                                    2026-01-14-10.16.22.863182
+               3 Seção                                                                                                                                                                                                    2026-01-14-10.16.22.863182
+               4 Divisão                                                                                                                                                                                                  2026-01-14-10.16.22.863182
+
+  4 registro(s) selecionado(s).
+
+
+select '##ARVORE_JOIN' from sysibm.sysdummy1
+
+1                          
+---------------------------
+##ARVORE_JOIN              
+
+  1 registro(s) selecionado(s).
+
+
+select e.IDESTRUTURA, e.DESCRESTRUTURA, e.IDESTRUTURAPAI, n.IDNIVELESTRUTURA, c.DESCRNIVEL from DBA.ESTRUTURA_MERCADOLOGICA e left join DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS n on n.IDESTRUTURA = e.IDESTRUTURA left join DBA.CONFIG_NIVEIS_ESTRUTURA_MERCADOLOGICA c on c.IDNIVELESTRUTURA = n.IDNIVELESTRUTURA order by e.IDESTRUTURA, n.IDNIVELESTRUTURA fetch first 100 rows only
+
+IDESTRUTURA DESCRESTRUTURA                                                                                                                                                                                                                                                  IDESTRUTURAPAI IDNIVELESTRUTURA DESCRNIVEL                                                                                                                                                                                              
+----------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------- ---------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  0 registro(s) selecionado(s).
+
+

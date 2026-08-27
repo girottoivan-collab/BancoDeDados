@@ -11,6 +11,8 @@ Artigos, estudos e resumos tecnicos.
 ## Arquivos imediatos
 
 - `analise_risco_fragmentacao_schema_dba_noponto.md`: Documentacao tecnica ou registro de analise.
+- `artigo_novo_modelo_estrutura_mercadologica.md`: Documentacao tecnica ou registro de analise.
+- `estrutura_mercadologica_der.svg`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.
 - `estudo_notas_entrada_saida_bigsm_tamanho_pagina_db2.md`: Documentacao tecnica ou registro de analise.
 - `estudo_notas_entrada_saida_tamanho_pagina_db2.md`: Documentacao tecnica ou registro de analise.
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.

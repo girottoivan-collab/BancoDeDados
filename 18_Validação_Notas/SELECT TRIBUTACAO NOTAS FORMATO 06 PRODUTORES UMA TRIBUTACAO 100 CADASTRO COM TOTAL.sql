@@ -50,7 +50,12 @@ TIPO_NOTA AS (
                 IDEMPRESA,
                 IDPLANILHA,
                 IDCLIFOR,
-                MAX(TIPO) AS TIPO
+                CASE
+                        WHEN COUNT(DISTINCT CASE
+                                WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
+                        END) >= 2 THEN '40-41-50-90'
+                        ELSE MAX(TIPO)
+                END AS TIPO
         FROM
                 ITENS_TRIBUTACAO
         GROUP BY
@@ -58,8 +63,13 @@ TIPO_NOTA AS (
                 IDPLANILHA,
                 IDCLIFOR
         HAVING
-                COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
-                AND MAX(TIPO) IS NOT NULL
+                COUNT(DISTINCT CASE
+                        WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
+                END) >= 2
+                OR (
+                        COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
+                        AND MAX(TIPO) IS NOT NULL
+                )
 ),
 TRIBUTACAO_XML AS (
         SELECT
@@ -213,7 +223,12 @@ TIPO_NOTA AS (
                 IDEMPRESA,
                 IDPLANILHA,
                 IDCLIFOR,
-                MAX(TIPO) AS TIPO
+                CASE
+                        WHEN COUNT(DISTINCT CASE
+                                WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
+                        END) >= 2 THEN '40-41-50-90'
+                        ELSE MAX(TIPO)
+                END AS TIPO
         FROM
                 ITENS_TRIBUTACAO
         GROUP BY
@@ -221,8 +236,13 @@ TIPO_NOTA AS (
                 IDPLANILHA,
                 IDCLIFOR
         HAVING
-                COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
-                AND MAX(TIPO) IS NOT NULL
+                COUNT(DISTINCT CASE
+                        WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
+                END) >= 2
+                OR (
+                        COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
+                        AND MAX(TIPO) IS NOT NULL
+                )
 ),
 TRIBUTACAO_XML AS (
         SELECT

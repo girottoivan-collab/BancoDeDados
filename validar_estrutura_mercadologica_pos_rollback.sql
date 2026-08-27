@@ -1,0 +1,11 @@
+select char(count(1))
+from DBA.ESTRUTURA_MERCADOLOGICA
+where IDESTRUTURA between 900000001 and 900000004@
+
+select char(count(1))
+from DBA.ESTRUTURA_MERCADOLOGICA_NIVEIS
+where IDESTRUTURA between 900000001 and 900000004@
+
+select char(count(1))
+from DBA.DIVISAO
+where IDESTRUTURAPAI between 900000001 and 900000004@

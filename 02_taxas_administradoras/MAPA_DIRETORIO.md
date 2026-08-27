@@ -12,7 +12,7 @@ Arquitetura e objetos de historico de taxas de administradoras.
 
 - `ADMINISTRADORAS_BANDEIRA_TAXA_HISTORICO.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 - `ArquiteturaTaxasAdministradoras.md`: Documentacao tecnica ou registro de analise.
-- `DER_TaxasAdministradoras.svg`: Diagrama ou fonte de diagrama do assunto indicado no nome.
+- `DER_TaxasAdministradoras.svg`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.
 - `UF_ADMIN_BANDEIRA_TAXA_DATA.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
 

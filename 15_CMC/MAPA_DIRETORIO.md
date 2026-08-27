@@ -10,8 +10,8 @@ Objetos de custo medio de compra.
 
 ## Arquivos imediatos
 
-- `DER_Agrupamento_Custo_CMC.mmd`: Diagrama ou fonte de diagrama do assunto indicado no nome.
-- `DER_Agrupamento_Custo_CMC.svg`: Diagrama ou fonte de diagrama do assunto indicado no nome.
+- `DER_Agrupamento_Custo_CMC.mmd`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.
+- `DER_Agrupamento_Custo_CMC.svg`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.
 - `Detalhamento_Alteracoes_ObjetosCMC.md`: Documentacao tecnica ou registro de analise.
 - `MAPA_DIRETORIO.md`: Mapa local do diretorio.
 - `ObjetosCMC.sql`: Script SQL de consulta, DDL, DML, function, trigger, view ou procedure.
