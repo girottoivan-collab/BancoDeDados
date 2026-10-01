@@ -38,6 +38,8 @@ Scripts, evidencias e documentacao vinculados a tickets CISS.
 - `CISS-181212 - explain.sql`: Script SQL associado ao ticket ou analise CISS indicado no nome.
 - `CISS-181212 - SQL Lentidão.sql`: Script SQL associado ao ticket ou analise CISS indicado no nome.
 - `CISS-181212 - sugestoes_melhoria.sql`: Script SQL associado ao ticket ou analise CISS indicado no nome.
+- `CISS-183652.sql`: Tabela de controle em TMP e procedure para inserir em lotes as baixas de descontos concedidos em titulos de contas a pagar.
+- `CISS-183652_ROLLBACK.sql`: Procedure para reverter somente as baixas registradas na tabela de controle da CISS-183652.
 - `Consulta CissHub.sql`: Script SQL associado ao ticket ou analise CISS indicado no nome.
 - `DER_CISS-181148_CHECKLIST.mmd`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.
 - `DER_CISS-181148_CHECKLIST.png`: Diagrama, imagem ou fonte de diagrama do assunto indicado no nome.

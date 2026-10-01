@@ -183,3 +183,56 @@ Validar amostras de consistência após o backfill com consultas que comparem `D
 A proposta é arquiteturalmente válida e ataca um problema clássico de tabelas temporais: substituir cálculo repetitivo de próximo evento por vigência materializada. O desenho deve melhorar consultas analíticas e operacionais que dependem de posição histórica de estoque, saldos contábeis e custos.
 
 O script, porém, precisa de ajustes antes de execução produtiva. Os achados mais relevantes são o erro lógico em `CONTABIL_SALDO`, as chamadas incompatíveis das procedures com `OUT`, a ausência de tratamento para `DROP` de objetos inexistentes e o alto impacto operacional do backfill sobre mais de 150 milhões de linhas. Com essas correções e uma execução faseada, a alteração tem boa sustentação técnica.
+
+## Observação arquitetural sobre custo de escrita
+
+A melhoria proposta resolve um problema recorrente em consultas que precisam descobrir o registro vigente por meio de `MAX(DTMOVIMENTO)`. Entretanto, é importante reconhecer que a solução não elimina o custo desse cálculo; ela transfere parte dele do momento da leitura para o momento da gravação.
+
+Sem `DTFIM`, consultas históricas precisam localizar o último movimento válido até uma data de referência. Com `DTFIM`, essa informação passa a estar materializada na linha, favorecendo consultas por intervalo. Em contrapartida, cada inserção, exclusão ou alteração relevante passa a exigir manutenção da cadeia temporal, normalmente buscando o movimento anterior com `MAX(DTMOVIMENTO)` e o posterior com `MIN(DTMOVIMENTO)`.
+
+Conceitualmente, uma trigger de manutenção em `ESTOQUE_SINTETICO` precisa resolver operações semelhantes a:
+
+```sql
+SELECT MAX(DTMOVIMENTO)
+FROM DBA.ESTOQUE_SINTETICO
+WHERE IDEMPRESA = ?
+  AND IDPRODUTO = ?
+  AND IDSUBPRODUTO = ?
+  AND IDLOCALESTOQUE = ?
+  AND DTMOVIMENTO < ?;
+
+SELECT MIN(DTMOVIMENTO)
+FROM DBA.ESTOQUE_SINTETICO
+WHERE IDEMPRESA = ?
+  AND IDPRODUTO = ?
+  AND IDSUBPRODUTO = ?
+  AND IDLOCALESTOQUE = ?
+  AND DTMOVIMENTO > ?;
+```
+
+Com um índice adequado, como `IDEMPRESA`, `IDPRODUTO`, `IDSUBPRODUTO`, `IDLOCALESTOQUE`, `DTMOVIMENTO`, o banco tende a resolver essas buscas por navegação em árvore B, encontrando o predecessor e o sucessor temporal sem varrer a tabela inteira. Ainda assim, o custo passa a fazer parte da transação de escrita.
+
+Na prática, uma gravação deixa de ser apenas a inclusão ou alteração de uma linha. Ela passa a envolver:
+
+- busca do registro anterior;
+- busca do registro posterior;
+- atualização do `DTFIM` do registro inserido ou alterado;
+- eventual atualização do `DTFIM` do registro anterior;
+- geração adicional de log;
+- maior tempo de transação;
+- maior chance de locks e contenção em chaves muito movimentadas.
+
+Portanto, a proposta deve ser entendida como uma desnormalização temporal controlada. Ela favorece ambientes onde a leitura histórica é muito mais frequente ou mais crítica que a escrita. Pode ser uma boa troca para tabelas sintéticas usadas em fechamento, posição histórica, saldo e custo, desde que o volume de escrita e a concorrência sejam compatíveis com o custo adicional das triggers.
+
+O risco aumenta em cenários com cargas massivas, integrações de alto volume ou várias sessões gravando simultaneamente a mesma combinação de empresa, produto, subproduto, local e data. Nesses casos, a trigger síncrona pode aumentar latência de gravação e ampliar contenção transacional.
+
+Uma alternativa arquitetural é substituir a manutenção síncrona por um modelo assíncrono:
+
+- a gravação transacional ocorre normalmente;
+- a chave alterada é registrada em uma fila de pendências;
+- um job posterior recalcula o `DTFIM` das chaves impactadas;
+- consultas críticas usam `DTFIM` apenas após a consolidação.
+
+Esse modelo reduz o impacto imediato na gravação, mas introduz consistência eventual. A escolha entre trigger síncrona e processamento assíncrono depende do requisito de atualização imediata do `DTFIM`, da frequência das consultas históricas e da sensibilidade da aplicação à latência de escrita.
+
+Assim, a pergunta central para aprovação da melhoria não é apenas se a consulta com `DTFIM` fica mais rápida, mas se o ganho nas leituras compensa o custo adicional nas escritas. Essa decisão deve ser sustentada por medição em ambiente representativo, considerando tempo de gravação, volume de log, locks, concorrência e impacto em cargas de integração.

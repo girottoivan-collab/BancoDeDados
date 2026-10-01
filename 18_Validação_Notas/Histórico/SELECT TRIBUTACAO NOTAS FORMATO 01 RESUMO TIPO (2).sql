@@ -8,7 +8,6 @@ WITH TIPOS AS (
         UNION ALL SELECT 'SUSPENSO-50' FROM SYSIBM.SYSDUMMY1
         UNION ALL SELECT 'DIFERIDO-51' FROM SYSIBM.SYSDUMMY1
         UNION ALL SELECT 'TRIBUTADO-00' FROM SYSIBM.SYSDUMMY1
-        UNION ALL SELECT '00-20-51' FROM SYSIBM.SYSDUMMY1
         UNION ALL SELECT '40-41-50-90' FROM SYSIBM.SYSDUMMY1
 ),
 NOTAS_MOVIMENTO AS (
@@ -25,7 +24,6 @@ NOTAS_MOVIMENTO AS (
         WHERE
                 EA.IDOPERACAO < 1000
                 AND OI.TIPOMOVIMENTO = 'C'
-                AND OI.FLAGMOVSALDOPRO = 'T'
                 AND N.FLAGMOVFISCAL = 'T'
                 AND N.FLAGNOTACANCEL = 'F'
                 AND EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
@@ -53,11 +51,8 @@ ITENS_TRIBUTACAO AS (
                 INNER JOIN DBA.ESTOQUE_ANALITICO EA ON
                         EA.IDEMPRESA = NM.IDEMPRESA
                         AND EA.IDPLANILHA = NM.IDPLANILHA
-                INNER JOIN DBA.OPERACAO_INTERNA OI ON
-                        OI.IDOPERACAO = EA.IDOPERACAO
         WHERE
-                OI.FLAGMOVSALDOPRO = 'T'
-                AND EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
+                EA.DTMOVIMENTO BETWEEN :RA_DTINI AND :RA_DTFIM
 ),
 TIPO_NOTA AS (
         SELECT
@@ -66,13 +61,7 @@ TIPO_NOTA AS (
                 CASE
                         WHEN COUNT(DISTINCT CASE
                                 WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
-                        END) >= 2
-                                AND COUNT(DISTINCT CASE
-                                        WHEN COALESCE(TIPO, 'OUTRO') NOT IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN COALESCE(TIPO, 'OUTRO')
-                                END) = 0 THEN '40-41-50-90'
-                        WHEN COUNT(DISTINCT CASE
-                                WHEN TIPO IN ('TRIBUTADO-00', 'REDUCAO-20', 'DIFERIDO-51') THEN TIPO
-                        END) >= 2 THEN '00-20-51'
+                        END) >= 2 THEN '40-41-50-90'
                         ELSE MAX(TIPO)
                 END AS TIPO
         FROM
@@ -81,16 +70,8 @@ TIPO_NOTA AS (
                 IDEMPRESA,
                 IDPLANILHA
         HAVING
-                (
-                        COUNT(DISTINCT CASE
-                                WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
-                        END) >= 2
-                        AND COUNT(DISTINCT CASE
-                                WHEN COALESCE(TIPO, 'OUTRO') NOT IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN COALESCE(TIPO, 'OUTRO')
-                        END) = 0
-                )
-                OR COUNT(DISTINCT CASE
-                        WHEN TIPO IN ('TRIBUTADO-00', 'REDUCAO-20', 'DIFERIDO-51') THEN TIPO
+                COUNT(DISTINCT CASE
+                        WHEN TIPO IN ('ISENTO-40', 'NAOTRIBUTADO-41', 'SUSPENSO-50', 'OUTROS-90') THEN TIPO
                 END) >= 2
                 OR (
                         COUNT(DISTINCT COALESCE(TIPO, 'OUTRO')) = 1
@@ -126,7 +107,6 @@ NOTAS_TOTAL AS (
         WHERE
                 NES.IDOPERACAO < 1000
                 AND OI.TIPOMOVIMENTO = 'C'
-                AND OI.FLAGMOVSALDOPRO = 'T'
                 AND N.FLAGMOVFISCAL = 'T'
                 AND N.FLAGNOTACANCEL = 'F'
                 AND N.DTMOVIMENTO BETWEEN DBA.DTINI(:RA_DTINI) AND DBA.DTFIM(:RA_DTFIM)
@@ -174,6 +154,5 @@ ORDER BY
                 WHEN 'SUSPENSO-50' THEN 7
                 WHEN 'DIFERIDO-51' THEN 8
                 WHEN 'TRIBUTADO-00' THEN 9
-                WHEN '00-20-51' THEN 10
-                WHEN '40-41-50-90' THEN 11
-        END;
+                WHEN '40-41-50-90' THEN 10
+        END
