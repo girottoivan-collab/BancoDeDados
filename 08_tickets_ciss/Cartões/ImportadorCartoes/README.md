@@ -89,7 +89,7 @@ Colunas técnicas ID, hash, aba, linha e data registram a origem. Não remova o 
 
 ## Compilação
 
-Requer JDK 17 x64 e Maven 3.9+, acesso ao Maven Central. Execute `powershell -File build.ps1 -Maven C:\caminho\mvn.cmd -Jdk C:\caminho\jdk-17`. A saída portátil fica em `dist/ImportadorCartoes-Windows-x64.zip`. Exclua ou renomeie a saída `dist/ImportadorCartoes` antes de reconstruir com jpackage. Esta distribuição contém um lançador `.exe`, não um instalador MSI.
+Requer JDK 17 x64 e Maven 3.9+, acesso ao Maven Central. Execute `powershell -File build.ps1 -Maven C:\caminho\mvn.cmd -Jdk C:\caminho\jdk-17`. A saída portátil fica em `distfinal/ImportadorCartoes-Windows-x64.zip`. Cada build concluido substitui automaticamente distfinal/, incluindo o executavel e o ZIP. O pacote anterior permanece se a compilacao ou o empacotamento falhar. Entre as distribuicoes, apenas distfinal/ e versionado; dist/ e dist-*/ ficam locais. Versoes anteriores permanecem no historico do Git. Esta distribuição contém um lançador `.exe`, não um instalador MSI.
 
 Validação sem banco: `java -cp "target/importador-cartoes-1.0.0.jar;target/lib/*" br.com.cartoes.App --validate caminho.xlsx` e `--self-test`.
 

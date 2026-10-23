@@ -1,0 +1,15 @@
+-- Somente leitura: progresso confirmado do ultimo lote, sem aguardar escrita no controle.
+SELECT
+    ROTINA,
+    EM_EXECUCAO,
+    RESULTADO,
+    INICIADO_EM,
+    ATUALIZADO_EM,
+    FINALIZADO_EM,
+    QTD_AVALIADOS,
+    ULTIMO_ID,
+    APPLICATION_HANDLE,
+    MENSAGEM
+FROM TMP.CARTOES_PROCESSAMENTO_CONTROLE
+WHERE ROTINA = 'SP_PROCESSAR_CARTOES_MOVIMENTO'
+WITH UR

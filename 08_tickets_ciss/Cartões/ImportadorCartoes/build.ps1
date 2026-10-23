@@ -1,8 +1,10 @@
-param([string]$Maven = 'mvn.cmd', [string]$Jdk = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.16.8-hotspot', [string]$Destination = 'dist')
+param([string]$Maven = 'mvn.cmd', [string]$Jdk = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.16.8-hotspot')
 $ErrorActionPreference = 'Stop'
 $env:JAVA_HOME = $Jdk
 Push-Location $PSScriptRoot
 try {
+    # Gerar primeiro em target; preservar distfinal se o build falhar.
+    $Destination = Join-Path $PSScriptRoot ('target\distribution-' + [guid]::NewGuid().ToString('N'))
     & $Maven -B clean package
     if ($LASTEXITCODE -ne 0) { throw 'Falha na compilação Maven.' }
     $stage = Join-Path $PSScriptRoot ('target\package-input-' + [guid]::NewGuid().ToString('N'))
@@ -19,7 +21,14 @@ try {
         if (Test-Path -LiteralPath $doc) { Copy-Item -LiteralPath $doc -Destination "$Destination\ImportadorCartoes" -Force }
     }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $zipTemp = Join-Path $PSScriptRoot ($Destination + '\package-' + [guid]::NewGuid().ToString('N') + '.zip')
-    [System.IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $PSScriptRoot "$Destination\ImportadorCartoes"), $zipTemp, [System.IO.Compression.CompressionLevel]::Optimal, $true)
+    $zipTemp = Join-Path $Destination ('package-' + [guid]::NewGuid().ToString('N') + '.zip')
+    [System.IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $Destination 'ImportadorCartoes'), $zipTemp, [System.IO.Compression.CompressionLevel]::Optimal, $true)
     Move-Item -LiteralPath $zipTemp -Destination "$Destination\ImportadorCartoes-Windows-x64.zip" -Force
+    # Substituir apenas o diretorio de distribuicao fixo deste projeto.
+    $final = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'distfinal'))
+    $expected = [IO.Path]::GetFullPath($PSScriptRoot) + [IO.Path]::DirectorySeparatorChar + 'distfinal'
+    if ($final -ne $expected) { throw 'Destino distfinal invalido.' }
+    if (Test-Path -LiteralPath $final) { Remove-Item -LiteralPath $final -Recurse -Force }
+    Move-Item -LiteralPath $Destination -Destination $final
+    Write-Host "Distribuicao atualizada: $final"
 } finally { Pop-Location }
