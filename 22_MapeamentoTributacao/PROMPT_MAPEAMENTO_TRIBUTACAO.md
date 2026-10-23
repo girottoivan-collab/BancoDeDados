@@ -84,7 +84,14 @@ Após definir a consulta do fornecedor, agrupar as suas notas monotipo por:
 `CONSULTA`, `IDCLIFOR`, `IDATIVIDADE`, `ATIVIDADE`, `PRODUTOR` e `TIPO`.
 
 `QTDNOTASTIPO` é a quantidade de notas monotipo daquele fornecedor e tipo.
-`XML`, `CAD`, `% XML` e `% CAD` são calculados sobre essa mesma quantidade.
+`XML`, `CAD`, `XML_CAD`, `% XML` e `% CAD` são calculados sobre essa mesma
+quantidade. A contagem de fonte é exclusiva por nota:
+
+- `XML`: todos os itens da nota foram obtidos do XML;
+- `CAD`: todos os itens da nota foram obtidos do Cadastro;
+- `XML_CAD`: a mesma nota possui itens de ambas as fontes.
+
+Assim, `XML + CAD + XML_CAD` deve ser igual a `QTDNOTASTIPO`.
 Assim, uma única linha representa um fornecedor + tipo, e **não** uma única
 nota; para conferir totais, usar `SUM(QTDNOTASTIPO)`, não `COUNT(*)` das linhas
 retornadas.

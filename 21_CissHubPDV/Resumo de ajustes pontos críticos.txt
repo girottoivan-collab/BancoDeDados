@@ -1,0 +1,377 @@
+- 1 NSU por tabela, 1 sequence por tabela, 1
+- Promoção - o que faz quando altera preços;
+- Deleção de produtos - tabela de controle ou controlar por coluna específica na própria tabela;
+
+-------------------------------------------------------------------------------------------
+
+- Restore, recriação ou reconstrução do hub reinicia as sequences e congela a sincronização (utilizar system_identifier):
+O problema acontece quando o PDV já avançou seu cursor, mas o hub volta a gerar NSUs menores.
+Exemplo:
+Antes da falha:
+PDV armazenou: epoch = A, último NSU = 8.500.000
+
+Após recriar/restaurar/reconstruir o hub:
+sequence NSU_PRODUTO volta a gerar: 1, 2, 3...
+
+Consulta do PDV:
+WHERE idnsu > 8500000
+
+Resultado: zero linhas para sempre.
+O problema é silencioso: para o PDV, “não há alteração”; para o hub, há alterações, porém com NSUs abaixo do cursor já armazenado.
+Epoch: a solução
+O epoch é uma identificação da “vida” ou geração atual do hub. O contrato deixa de ser apenas:
+último_nsu = 8.500.000
+e passa a ser:
+epoch = 9a4d...
+último_nsu = 8.500.000
+A API deve sempre devolver o epoch junto com os dados incrementais. Quando o PDV receber uma resposta cujo epoch seja diferente do que possui localmente, ele deve:
+1. Parar de aplicar o incremental.
+2. Limpar ou substituir sua cópia local dos dados sincronizados.
+3. Zerar o cursor.
+4. Executar uma carga inicial/snapshot.
+5. Gravar o novo epoch e retomar o incremental a partir do NSU obtido no snapshot.
+Ou seja: a mudança de epoch transforma uma situação que congelaria silenciosamente em uma ressincronização explícita.
+system_identifier do PostgreSQL
+O PostgreSQL cria automaticamente um system_identifier quando o cluster é inicializado com initdb. Ele pode ser consultado assim:
+SELECT system_identifier
+FROM pg_control_system();
+Esse identificador é do cluster PostgreSQL, não da empresa, do PDV ou da tabela. A documentação o expõe como um bigint da estrutura de controle do cluster. Documentação oficial
+Ele pode ajudar a identificar que um hub foi criado em um cluster novo. Porém, eu não o usaria como solução única:
+- Uma restauração física pode preservar o mesmo system_identifier.
+- Um clone físico também pode carregar o mesmo identificador.
+- Uma restauração para um ponto anterior pode manter o identificador, mas fazer sequences e dados retrocederem.
+- O requisito é detectar a perda de continuidade do feed de NSU, não apenas a troca de servidor.
+Portanto, a opção mais segura é criar um epoch de aplicação, controlado pelo processo de implantação/recuperação.
+Estrutura recomendada no hub
+Uma tabela pequena, com uma única linha por hub, é suficiente:
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE public.sync_hub_controle (
+    id_hub              smallint PRIMARY KEY DEFAULT 1
+                        CHECK (id_hub = 1),
+    sync_epoch          uuid NOT NULL,
+    dh_criacao_epoch    timestamptz NOT NULL DEFAULT clock_timestamp(),
+    motivo_alteracao    text NOT NULL,
+    system_identifier   bigint,
+    CONSTRAINT uq_sync_hub_controle_epoch UNIQUE (sync_epoch)
+);
+
+INSERT INTO public.sync_hub_controle (
+    sync_epoch,
+    motivo_alteracao,
+    system_identifier
+)
+SELECT
+    gen_random_uuid(),
+    'criação inicial do hub',
+    system_identifier
+FROM pg_control_system();
+Consulta que a API pode executar:
+SELECT sync_epoch
+FROM public.sync_hub_controle
+WHERE id_hub = 1;
+Em uma recriação, reconstrução ou recuperação que possa voltar NSUs, o procedimento deve girar o epoch:
+UPDATE public.sync_hub_controle
+SET sync_epoch = gen_random_uuid(),
+    dh_criacao_epoch = clock_timestamp(),
+    motivo_alteracao = 'hub reconstruído a partir do DB2',
+    system_identifier = (
+        SELECT system_identifier
+        FROM pg_control_system()
+    )
+WHERE id_hub = 1;
+Esse UPDATE precisa fazer parte obrigatória do runbook de recuperação. Se o hub for restaurado de backup, ele deve ocorrer após a restauração, pois a tabela de controle provavelmente também será restaurada com seu epoch antigo.
+A tabela sugerida por você
+Uma tabela com:
+IDEMPRESA, PDV, IDNSU, DTSYNC
+é útil, mas tem outra responsabilidade: ela guarda o checkpoint por PDV. Ela não substitui a tabela de epoch do hub.
+Uma versão mais completa seria:
+CREATE TABLE public.sync_pdv_checkpoint (
+    idempresa       bigint       NOT NULL,
+    idpdv           bigint       NOT NULL,
+    recurso         text         NOT NULL, -- tabela, feed ou domínio sincronizado
+    sync_epoch      uuid         NOT NULL,
+    ultimo_nsu      bigint       NOT NULL,
+    dh_sync         timestamptz  NOT NULL DEFAULT clock_timestamp(),
+    PRIMARY KEY (idempresa, idpdv, recurso)
+);
+Significado dos campos:
+Campo	Finalidade
+sync_epoch	Geração do hub com a qual o PDV foi sincronizado
+ultimo_nsu	Cursor incremental dentro daquela geração
+idempresa / idpdv	Identificam o consumidor
+recurso	Necessário se houver NSU por tabela; pode ser omitido se houver cursor global
+dh_sync	Observabilidade: detecta PDV parado ou atrasado
+
+
+A comparação é:
+epoch armazenado no PDV = epoch devolvido pela API?
+- Sim: aplicar incremental com WHERE idnsu > ultimo_nsu.
+- Não: invalidar o checkpoint e executar snapshot.
+Fluxo recomendado da API
+Resposta de um endpoint de snapshot:
+{
+  "sync_epoch": "9a4d4b91-5714-4f91-a406-b54328ef54e1",
+  "snapshot_nsu": 8500000,
+  "dados": [ ... ]
+}
+Resposta de um endpoint incremental:
+{
+  "sync_epoch": "9a4d4b91-5714-4f91-a406-b54328ef54e1",
+  "proximo_nsu": 8500120,
+  "tem_mais": false,
+  "dados": [ ... ]
+}
+O PDV persiste o sync_epoch e o cursor somente depois de aplicar a página com sucesso. Se o epoch mudar durante uma sincronização, ele descarta o processamento parcial e recomeça via snapshot.
+Em resumo: sua tabela de IDEMPRESA/PDV/IDNSU/DTSYNC é apropriada como controle de progresso e monitoramento. Para resolver o congelamento, inclua também o SYNC_EPOCH; e mantenha uma tabela de controle do hub que gere e altere esse epoch sempre que a continuidade dos NSUs for perdida.
+
+--
+o hub não deve entregar um snapshot ao PDV logo após uma restauração, pois ele pode representar um estado antigo do DB2. Mas eu separaria os identificadores em duas responsabilidades. Não é seguro exigir que “o mesmo UUID” exista no DB2, hub e PDV.
+- source_epoch: identifica a geração/linhagem dos dados da origem DB2.
+- feed_epoch: identifica a geração do feed entregue pelo hub ao PDV.
+O source_epoch deve ser igual entre DB2 e hub quando o hub está carregado a partir daquela geração da origem. Já o feed_epoch é próprio do hub e é o que o PDV usa para decidir se pode continuar usando seu IDNSU.
+Isso evita um problema importante: o hub pode ser reconstruído a partir do mesmo DB2, portanto o source_epoch continua válido, mas os NSUs do hub podem reiniciar. Nesse caso, o PDV precisa de um novo feed_epoch, embora o DB2 não tenha mudado de geração.
+Metadados sugeridos
+No DB2, manter uma tabela de controle da origem, alterada somente quando a linhagem dos dados for invalidada — por exemplo, recriação, restauração para um ponto anterior ou troca da base transacional:
+-- Representação conceitual; ajustar tipos/sintaxe ao Db2 adotado
+CREATE TABLE sync_origem_controle (
+    id_origem          SMALLINT NOT NULL PRIMARY KEY,
+    source_epoch       CHAR(36) NOT NULL,
+    dh_epoch           TIMESTAMP NOT NULL,
+    motivo             VARCHAR(200) NOT NULL
+);
+Exemplo:
+source_epoch = 18b48ce4-133c-4f49-8ac0-f58bd1a25351
+No hub PostgreSQL:
+CREATE TABLE public.sync_hub_controle (
+    id_hub                    smallint PRIMARY KEY DEFAULT 1,
+    source_epoch_aplicado     uuid,
+    posicao_origem_aplicada   bigint,       -- ou LSN, timestamp + chave, ID de lote etc.
+    feed_epoch                uuid NOT NULL,
+    status                    text NOT NULL, -- CARREGANDO, ATUALIZANDO, PRONTO, ERRO
+    dh_atualizacao            timestamptz NOT NULL DEFAULT clock_timestamp(),
+    motivo                    text
+);
+No PDV, localmente — ou em uma tabela central de monitoramento, se necessário:
+CREATE TABLE sync_pdv_checkpoint (
+    idempresa        bigint NOT NULL,
+    idpdv            bigint NOT NULL,
+    recurso          text NOT NULL,
+    feed_epoch       uuid NOT NULL,
+    ultimo_nsu       bigint NOT NULL,
+    dh_sync          timestamptz NOT NULL,
+    PRIMARY KEY (idempresa, idpdv, recurso)
+);
+recurso é necessário caso exista um NSU por tabela. Se houver um feed/cursor global, pode ser removido.
+Regra principal
+O hub só pode atender o PDV quando estiver marcado como PRONTO e quando:
+source_epoch do DB2 = source_epoch_aplicado no hub
+Além disso, o hub deve ter aplicado os dados do DB2 até uma posição conhecida e validada.
+A comparação com o PDV é outra:
+feed_epoch do PDV = feed_epoch atual do hub?
+- Se iguais, o PDV pode continuar com WHERE idnsu > ultimo_nsu.
+- Se diferentes, o PDV deve fazer snapshot no hub, mas apenas quando o hub estiver PRONTO.
+Fluxo de restauração/reconstrução do hub
+DB2             Hub PostgreSQL                    PDV
+ |                    |                            |
+ | source_epoch=A    | feed_epoch=H1               | feed_epoch=H1, NSU=8.500.000
+ |                    |                            |
+ |                    | RESTORE / REBUILD          |
+ |                    | status = CARREGANDO        |
+ |                    | feed_epoch = H2            |
+ |                    | API não atende PDV         |
+ |------------------->| carga full / incremental   |
+ |                    | validação                  |
+ |                    | source_epoch_aplicado = A  |
+ |                    | status = PRONTO            |
+ |                    |                            |
+ |                    |--------------------------->| devolve feed_epoch=H2
+ |                    |                            | detecta H1 != H2
+ |                    |<---------------------------| solicita snapshot
+ |                    |--------------------------->| snapshot consistente
+A ordem é crucial:
+1. O hub é restaurado ou reconstruído.
+2. A API marca o hub como indisponível para sincronismo, por exemplo com HTTP 503 e código HUB_SYNC_NOT_READY.
+3. O hub recebe um novo feed_epoch.
+4. O processo de Sync lê o source_epoch e a posição atual do DB2.
+5. O Sync atualiza o hub a partir do DB2.
+6. Contagens, checksums ou outras validações confirmam que a carga está íntegra.
+7. O hub grava source_epoch_aplicado, a posição aplicada e muda o status para PRONTO.
+8. Só então o PDV é autorizado a fazer snapshot.
+9. Como o feed_epoch mudou, o PDV descarta seu checkpoint anterior e carrega dados do hub já atualizado.
+Assim, o PDV nunca é direcionado a um snapshot de um hub restaurado, mas ainda desatualizado em relação ao DB2.
+Matriz de decisão
+Situação	DB2 source_epoch x hub	Hub está pronto?	PDV feed_epoch x hub	Ação
+Operação normal	Igual	Sim	Igual	Consumir incremental por NSU
+Hub restaurado, ainda sem carga	Pode ser igual ou diferente	Não	Qualquer	API bloqueia sincronização
+DB2 refeito/restaurado	Diferente	Não	Qualquer	Carga full DB2 → hub, validação e novo feed_epoch
+Hub refeito a partir do mesmo DB2	Igual após carga	Sim	Diferente	PDV executa snapshot
+PDV novo ou formatado	Igual	Sim	Sem checkpoint/diferente	PDV executa snapshot
+Hub atrasado, mas íntegro	Igual	Não até alcançar origem	Igual ou diferente	Aplicar delta DB2 → hub; liberar somente após alcançar a posição alvo
+
+
+Caso em que os UUIDs são iguais, mas o hub está atrasado
+A igualdade de source_epoch não prova que os dados estão atuais. Ela prova somente que DB2 e hub pertencem à mesma linhagem.
+Por isso, o hub também precisa registrar uma posição de origem, por exemplo:
+posicao_origem_aplicada = 94.821.003
+posicao_origem_atual    = 94.824.510
+Se o hub está na posição 94.821.003 e o DB2 já está em 94.824.510, o Sync precisa aplicar o delta pendente antes de liberar o hub ao PDV.
+A posição pode ser:
+- ID crescente de tabela de auditoria/CDC no DB2;
+- LSN, se a solução de captura o disponibilizar;
+- ID de lote publicado;
+- combinação de data/hora de alteração com chave de desempate;
+- outro cursor monotônico e confiável.
+Um timestamp isolado não é ideal, pois duas alterações podem ter o mesmo horário ou ocorrer fora de ordem. Um identificador crescente de evento/lote é mais seguro.
+Quando fazer carga full e quando aplicar delta
+Carga full DB2 → hub deve ocorrer quando:
+- source_epoch do DB2 for diferente do registrado no hub;
+- não houver trilha de alterações suficiente para recuperar o delta;
+- houver suspeita de inconsistência;
+- a validação por contagem/checksum falhar;
+- o hub tiver sido reconstruído sem preservar dados e cursores da origem.
+Aplicar somente o delta é aceitável quando:
+- source_epoch for igual;
+- houver um cursor confiável de alterações no DB2;
+- o hub souber até onde aplicou;
+- for possível aplicar todos os eventos faltantes, inclusive exclusões;
+- a validação final confirmar que o hub alcançou a posição-alvo da origem.
+Ponto importante sobre o feed_epoch
+Após qualquer restauração do hub que possa fazer sequences ou dados retrocederem, eu recomendo sempre gerar um novo feed_epoch, mesmo que o source_epoch do DB2 não tenha mudado.
+Exemplo:
+DB2 source_epoch: A                 -- não mudou
+Hub anterior feed_epoch: H1         -- PDV chegou ao NSU 8.500.000
+Hub restaurado: NSU volta para 7.000.000
+Hub, após se atualizar do DB2: feed_epoch H2
+PDV: detecta H1 != H2 e faz snapshot
+Se o feed_epoch permanecesse H1, o PDV continuaria perguntando por IDNSU > 8.500.000 e congelaria novamente.
+O system_identifier do PostgreSQL pode ser armazenado como informação diagnóstica — ele é um identificador do cluster, gerado durante a inicialização e consultável por pg_control_system() — mas não substitui o feed_epoch controlado pela aplicação. Documentação oficial do PostgreSQL
+
+-------------------------------------------------------------------------------------------
+
+- SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+
+Ela cria um lock lógico, válido apenas durante a transação, para serializar quem executa a carga que atribui NSUs.
+SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+- hashtext('nsu_sync'): converte a chave textual fixa nsu_sync em um número usado como identificador do lock.
+- pg_advisory_xact_lock(...): solicita um lock exclusivo associado a esse identificador.
+- _xact_: o lock é liberado automaticamente no COMMIT ou ROLLBACK.
+Uso prático:
+BEGIN;
+
+SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+
+-- INSERTs / UPDATEs que acionam o trigger
+-- e atribuem IDNSU via nextval(...)
+
+COMMIT;
+Se outro processo tentar executar a mesma linha antes do primeiro COMMIT, ele fica aguardando. Assim, não existem duas transações concorrentes atribuindo NSU ao mesmo tempo: a ordem de consumo da sequence passa a acompanhar a ordem de confirmação das transações.
+No cenário do documento, isso evita que uma transação receba NSU 100, fique aberta, enquanto outra recebe 101 e confirme antes. Sem o lock, o PDV pode avançar para 101 e nunca receber o 100 quando a primeira transação confirmar depois.
+Cuidados importantes:
+- Todos os escritores que possam alterar as tabelas sincronizadas precisam adquirir o mesmo lock; um processo que não o use ainda pode causar o problema.
+- Ele serializa a carga: há um escritor por vez. É adequado se o Sync já for sequencial.
+- Se houver necessidade real de paralelismo, o documento sugere uma alternativa: controlar lotes e expor à API apenas o intervalo de NSUs já seguro/confirmado.
+
+Nesse caso:
+- 'nsu_sync' é uma string arbitrária, escolhida pela aplicação/equipe.
+- hashtext(...) a converte em um número inteiro.
+- Esse número identifica o “cadeado” compartilhado entre as transações.
+Todas as rotinas que precisem serializar a geração de NSU devem usar exatamente a mesma chave:
+SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+Assim, elas disputam o mesmo lock e uma aguarda a outra terminar.
+A sequence seria outro objeto, por exemplo:
+public.nsu_produto
+public.nsu_produto_kit
+ou uma única sequence global, como:
+public.nsu_global
+O lock nsu_sync não cria nem referencia automaticamente nenhuma dessas sequences. Ele apenas protege o trecho de transação que atualiza tabelas e dispara os triggers que chamam nextval(...) nas sequences.
+
+Se cada transação fizer isto antes de inserir/atualizar os registros:
+BEGIN;
+
+SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+
+-- INSERT/UPDATE em PRODUTO
+-- trigger chama nextval('nsu_produto')
+
+COMMIT;
+o comportamento será:
+1. A transação A obtém o lock nsu_sync.
+2. A transação B executa a mesma chamada e fica aguardando.
+3. A transação A faz COMMIT ou ROLLBACK; o PostgreSQL libera o lock automaticamente.
+4. A transação B obtém o lock e continua.
+Portanto, B não recebe IDNSU antes de A terminar — desde que o lock seja adquirido antes de qualquer escrita que acione o trigger de NSU.
+Um detalhe importante: usando a mesma chave nsu_sync, isso bloqueia também cargas em outras tabelas, como PRODUTO_KIT, mesmo que usem sequences distintas. Isso é intencional se a regra for serializar todo o processo de sincronismo.
+Caso quisessem serializar por tabela, poderiam usar chaves diferentes:
+SELECT pg_advisory_xact_lock(hashtext('nsu_produto'));
+Mas, no contexto da proposta, um lock global é mais seguro para impedir que qualquer transação concorrente produza NSUs confirmados fora de ordem.
+
+Se o pg_advisory_xact_lock for chamado apenas pela aplicação/Sync, uma alteração direta no PostgreSQL pode furar essa regra e recriar o risco de perda lógica para o PDV.
+Exemplo:
+T1 — Sync:
+  BEGIN
+  obtém lock nsu_sync
+  atualiza PRODUTO A → trigger gera NSU 100
+  permanece aberta
+
+T2 — acesso direto ao banco, sem lock:
+  BEGIN
+  atualiza PRODUTO B → trigger gera NSU 101
+  COMMIT
+
+PDV:
+  consulta IDNSU > 99
+  recebe 101
+  grava último_nsu = 101
+
+T1:
+  COMMIT
+
+PDV:
+  consulta IDNSU > 101
+  nunca recebe o registro 100
+O problema não é uma lacuna numérica na sequence. Lacunas são normais, por exemplo por rollback ou ON CONFLICT, e não causam perda por si só. O problema é um NSU menor ficar visível depois de o PDV já ter avançado seu cursor para um NSU maior.
+Há três formas complementares de proteger isso:
+1. Restringir escrita direta.
+   - API com papel somente leitura.
+   - Sync com papel específico de escrita.
+   - Usuários de suporte sem INSERT, UPDATE ou DELETE nas tabelas sincronizadas.
+   - Mudanças emergenciais devem usar uma rotina controlada.
+2. Exigir o lock no procedimento de manutenção.
+BEGIN;
+
+SELECT pg_advisory_xact_lock(hashtext('nsu_sync'));
+
+UPDATE public.produto
+SET ...
+WHERE ...;
+
+COMMIT;
+Qualquer script/manual que altere tabelas integradas deve adquirir o mesmo lock antes da primeira alteração.
+3. Tornar a proteção automática no trigger.
+Como a proposta já sugere uma função de trigger genérica, ela poderia adquirir o lock antes de atribuir o NSU:
+CREATE OR REPLACE FUNCTION public.fn_set_nsu()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Opcional: não gera NSU para UPDATE sem mudança real
+    IF TG_OP = 'UPDATE'
+       AND to_jsonb(NEW) - 'idnsu' = to_jsonb(OLD) - 'idnsu' THEN
+        RETURN NULL;
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(hashtext('nsu_sync'));
+
+    NEW.idnsu := nextval(TG_ARGV[0]::regclass);
+    RETURN NEW;
+END;
+$$;
+Nesse desenho, inclusive um UPDATE executado diretamente no banco aguardará o mesmo lock, desde que o trigger esteja ativo.
+Ainda assim, um superusuário/DBA pode burlar a proteção ao desabilitar triggers, usar session_replication_role = 'replica' ou alterar manualmente IDNSU. Por isso, a solução real é combinar:
+permissões restritas
++ trigger habilitada com ENABLE ALWAYS
++ lock automático ou obrigatório
++ procedimento operacional para manutenção
++ alerta para IDNSU = 0 e divergência de dados
+Para este cenário, eu tenderia a colocar o lock na função genérica de trigger e também manter o lock explícito no início do lote do Sync. O lock externo deixa a intenção clara e reduz espera por linha; o lock no trigger protege contra alterações diretas que escapem do processo normal.

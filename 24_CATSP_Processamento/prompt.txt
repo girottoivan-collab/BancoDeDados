@@ -1,0 +1,42 @@
+conecte ao banco de dados
+FERRARI
+HOST:  10.250.0.4
+PORTA:  50005
+usuário: dba
+senha: [REMOVIDA - informar por canal seguro]
+
+diretório demanda: BancoDeDados\24_CATSP_Processamento
+
+Orientações:
+1 - Criar uma tabela para importar os NCM's que serão utilizados para a busca dos produtos, importando nessa tabela a planilha Relacao_NCMs_Anexos_VII_VIII_XIV_XVIII_XXI, presente no diretório base;
+2 - Criar uma tabela para gravar os produtos relacionados aos NCM's da tabela do item 1, com os dados:
+- Código interno do item (buscar da PRODUTOS_VIEW, campos IDPRODUTO e IDSUBPRODUTO);
+- Descrição do produto (buscar da PRODUTOS_VIEW, campo DESCRCOMPRODUTO);
+- NCM (buscar da PRODUTOS_VIEW);
+- CEST (buscar da PRODUTOS_VIEW);
+- Unidade de medida (buscar da PRODUTOS_VIEW);
+- Quantidade em estoque considerada para o levantamento (utilizar UF_SALDOEST_DTPOSICAO, retornar de todas as empresas e somar, fazendo um crossjoin com a tabela EMPRESA).
+- DtMovimento (Deve ser considerado posição do Estoque 30/09/2026, de todos os produtos com os NCM da relação em anexo).
+3 - A partir dos dados gravados na tabela da etapa 2, para cada produto, buscar na tabela ESTOQUE_ANALITICO os movimentos de compra (IDOPERACAO < 1000 e TIPOCATEGORIA = C). Terá uma terceira tabela para fazer o consumo do saldo do produto. O objetivo é buscar as notas de entrada até que contemplem a quantidade gravada pela function de posição de estoques, registrando os dados da nota e a quantidade respectiva de cada nota, ou seja, se a quantidade em estoque for de 100 e o produto tiver 3 notas com quantidade 40, registraria 40 da nota mais recente, 40 da penúltima e 20 da ante-penúltima, detalhando as seguintes informações das notas:
+- IDEMPRESA e IDPLANILHA (ESTOQUE_ANALITICO);
+- Chave de acesso da NF-e (tabela NOTA_FISCAL_ELETRONICA vinculada a ESTOQUE_ANALITICO via IDPLANILHA e IDEMPRESA);
+- Número da nota fiscal (NUMNOTA tabela NOTAS vinculada a ESTOQUE_ANALITICO via IDPLANILHA e IDEMPRESA);
+- Série  (SERIENOTA tabela NOTAS vinculada a ESTOQUE_ANALITICO via IDPLANILHA e IDEMPRESA);
+- Data de emissão (DTEMISSAO tabela NOTAS_ENTRADA_SAIDA vinculada a ESTOQUE_ANALITICO via IDPLANILHA e IDEMPRESA);
+- CNPJ do fornecedor (CNPJCPF tabela NOTAS_ENTRADA_SAIDA vinculada a ESTOQUE_ANALITICO via IDPLANILHA e IDEMPRESA);
+- Código do item na entrada, quando aplicável  (CODPRODUTO tabela ESTOQUE_ANALITICO_XML vinculada a ESTOQUE_ANALITICO via IDPLANILHA, IDEMPRESA e NUMSEQUENCIA);
+- Quantidade adquirida (QTDPRODUTO da ESTOQUE_ANALITICO da nota capturada);
+- Quantidade considerada para composição do estoque (mesma quantidade do campo anterior, porém, seria a quantidade a utilizar da nota, que no caso do exemplo do cabeçalho onde a ante-penúltima nota consumiria apenas as 20 quantidades remanescentes do consumo do estoque disponível do item).
+4 - Juntamente com os dados listados no item 3, teremos campos de valores que serão utilizados para compor o cálculo a restituição de valores desses produtos, conforme segue:
+- Valor unitário da mercadoria / custo de aquisição; Qual campo/tabela?
+- Base de cálculo do ICMS próprio unitário do fornecedor; Tabela 33 - Estoque Analítico ST, campo Base de Cálculo ICMS Crédito/ Qtde Produto, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, campo Base de ICMS/ Qtde Produto.
+- Alíquota do ICMS próprio; Tabela 33 - Estoque Analítico ST, campo % ICMS Crédito, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, campo % ICMS.
+- Valor unitário do ICMS próprio, correspondente à parcela a ser recuperada; Tabela 33 - Estoque Analítico ST, campo Val ICMS Crédito/ Qtde Produto, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, Val ICMS/ Qtde Produto.
+- Base de cálculo do ICMS-ST retido; Tabela 33 - Estoque Analítico ST, campo Val Base ST Retido/ Qtde Produto, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, campo Val Base Subst/ Qtde Produto.
+- Valor unitário do ICMS-ST retido; Tabela 33 - Estoque Analítico ST, campo Val ICMS ST Retido/ Qtde Produto, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, Val ICMS Subst/ Qtde Produto.
+- Quantidade utilizada no cálculo; Qtde Produto da Tabela 1 - Estoque Analítico, que utilizou da nota para atender quantidade em estoque 30/09/2026;
+- Percentual de redução da base de cálculo, quando aplicável; Buscar na Tabela 1 - Estoque Analítico, campo % Red Trib
+- Alíquota interna;  Tabela 33 - Estoque Analítico ST, campo % ICMS ICMS ST, caso esse for zero, 2º Buscar na Tabela 1 - Estoque Analítico, campo % ICMS.
+- Alíquota interestadual, quando aplicável;Tabela 33 - Estoque Analítico ST, campo % ICMS ICMS Crédito
+
+Documente toda essa solicitação em um arquivo md no diretório e também no diretório global da pasta.

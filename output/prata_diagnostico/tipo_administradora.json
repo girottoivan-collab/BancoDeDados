@@ -1,0 +1,18 @@
+[
+  {
+    "TABNAME": "ADMINISTRADORAS_BANDEIRA",
+    "COLNAME": "IDADMINISTRADORA",
+    "TYPENAME": "INTEGER",
+    "LENGTH": 4,
+    "SCALE": 0,
+    "NULLS": "N"
+  },
+  {
+    "TABNAME": "CONTAS_RECEBER",
+    "COLNAME": "IDADMINISTRADORA",
+    "TYPENAME": "INTEGER",
+    "LENGTH": 4,
+    "SCALE": 0,
+    "NULLS": "Y"
+  }
+]

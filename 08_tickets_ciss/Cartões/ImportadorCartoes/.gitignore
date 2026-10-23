@@ -1,0 +1,8 @@
+/target/
+/dist/
+/dist-*/
+config.properties
+secret.key
+importador.lock
+/logs/
+/Planilhas/

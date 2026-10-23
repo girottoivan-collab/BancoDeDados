@@ -11,3 +11,7 @@ Thumbs.db
 *.bak
 *.backup
 *~
+
+# Dependencias e arquivos temporarios de trabalho.
+/tmp/
+.~lock.*#
